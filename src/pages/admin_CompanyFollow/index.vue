@@ -102,7 +102,7 @@
               <div class="scroll-list-wrap saleWarp">
                 <cube-scroll ref="scrollSale" :data="Status" :options="saleOptions">
                   <ul class="selectListPerson">
-                    <li  :class='{active:textColor}'>{{personSelect}}</li>
+                    <li  :class='{active:textColor}' @click='allGroup()'>{{personSelect}}</li>
                     <li v-for="(item,index) in Person" :key='index' :dataZM='item.ZM' 
                     :class="{active:index==personHasActive}">
                       <span>{{item.Name}}</span>
@@ -805,7 +805,14 @@
       sureGroup(){
            this.SaleID=this.isFoodActive.join(',')
            this.hasMask=[false,false,false]
+           this.page=1
         this.getMyMember()
+        this.$refs.scroll.scrollTo(0,0)
+      },
+      //全部组员点击
+      allGroup(){
+        this.isFoodActive=[]
+        this.textColor=true
       },
       // 组员重置
       resetGroup(){
@@ -1048,8 +1055,13 @@
       sureState() {
         this.moreNum = this.isStatus.length + this.isStyle.length
         this.page = 1
-        this.getList()
-        this.maskStatus(2)
+        this.hasMask=[false,false,false]
+        this.$refs.scroll.scrollTo(0,0)
+        if (this.AccessId==-1) {
+          this.getList()
+        }else if (this.AccessId==5){
+          this.getMyMember()
+        } 
       },
       stateCheck(item) {
         this.allStatus = false

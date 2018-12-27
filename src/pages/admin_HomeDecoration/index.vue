@@ -1,4 +1,5 @@
 <template>
+   
   <!-- 家装公司管理 -->
   <div class="HomeDecoration companyTop" :class="{active:Mask}">
     <!-- 上部 -->
@@ -53,7 +54,7 @@
               <div>
                 <div class="leftUl  widthUL grayF9">
                   <ul class="leftList" v-show='showDistrib'>
-                    <li v-if='leftList.length==0' :class='{active:textColor}'>全部{{allText}}</li>
+                    <li v-if='allColor' :class='{active:textColor}'>全部{{allText}}</li>
                     <li v-for='(item,index) in leftList' @click='leftClick(item,index)' :class='{active:index==leftActive}'>{{item.Name}}</li>
                     <li v-if='!allColor' :class='{active:leftTextColor}' v-html='rightAllText' @click='allClick&&leftAllClick()' ></li>
                   </ul>
@@ -62,7 +63,7 @@
                 <div class="scroll-list-wrap saleWarp" v-show="showDistrib">
                   <cube-scroll ref="scrollSale" :data="Status" :options="saleOptions">
                     <ul class="rightList white" v-show='showDistrib'>
-                        <li v-if='leftList.length==0' :class='{active:textColor}'>全部{{allText}}</li>
+                      <li v-if='leftList.length==0' :class='{active:textColor}'>全部{{allText}}</li>
                       <li @click='rightAllClick()' :class='{active:textColor}' v-html='leftAllText' v-else></li>
                       <li v-for="(item,index) in Status" :key='index' :dataZM='item.ZM' @click='clickFlag&&index!=rightActive&&item.list.length>0&&rightClick(item,index)'
                         :class='{active:index==rightActive}'>
@@ -113,42 +114,43 @@
     </div>
     <div class="listWrap">
       <div class="scroll-list-wrap">
-      <cube-scroll ref="scroll" :data="List" :options="options" @pulling-up="onPullingUp">
-      <!-- 公司列表 -->
-      <div class="comList">
-      <focusList :list="List" id="list" v-if="!admin" :Action="active"></focusList>
-      <empty v-if='emptyFlag'></empty>
-      <div>
-      <div class="contentList" v-for="(item,index) in List" :key="index" v-if="admin" @click="jump(item.ID)">
-      <div class="contentListTop">
-      <p class="firstLine">
-      <span :class="{qiaTan:item.Status==1,qianYue:item.Status==2,qianYued:item.Status==3,fangQi:item.Status==-1,xinJian:item.Status==0,guoQi:item.Status==-3}">{{item.StatusName}}</span>
-      <span v-if="item.Status!=3">剩余保护期:{{item.EndDate}}天</span>
-      <span v-if="item.Status==3">合同剩余时间:{{item.EndTime}}天</span>
-      </p>
-      <p class="twoLine">
-      <a href="javascript:;" class="round" :class="{'active':checkBoxs[index]}" @click.stop="check(index,item.ID)"><b
-      :class="{'active':checkBoxs[index]}"></b></a>
-      <!-- 公司评级 -->
-      <!-- <a href="javascript:;" class="bigIcon"><span class="smallIcon"><b>B+</b></span></a> -->
-      <a href="javascript:;" class="name">{{item.Name}}</a>
-      </p>
-      <p class="downLine"><span class="zuZhi">{{item.SalesManName}}</span><b>({{item.Organization}})</b></span><span class="address">{{item.Address}}</span></p>
-      <i v-if="item.IsEmphasis"></i>
+        <cube-scroll ref="scroll" :data="List" :options="options" @pulling-up="onPullingUp">
+          <!-- 公司列表 -->
+          <div class="comList">
+            <focusList :list="List" id="list" v-if="!admin" :Action="active"></focusList>
+            <empty v-if='emptyFlag'></empty>
+            <div>
+              <div class="contentList" v-for="(item,index) in List" :key="index" v-if="admin" @click="jump(item.ID)">
+                <div class="contentListTop">
+                  <p class="firstLine">
+                    <span :class="{qiaTan:item.Status==1,qianYue:item.Status==2,qianYued:item.Status==3,fangQi:item.Status==-1,xinJian:item.Status==0,guoQi:item.Status==-3}">{{item.StatusName}}</span>
+                    <span v-if="item.Status!=3">剩余保护期:{{item.EndDate}}天</span>
+                    <span v-if="item.Status==3">合同剩余时间:{{item.EndTime}}天</span>
+                  </p>
+                  <p class="twoLine">
+                    <a href="javascript:;" class="round" :class="{'active':checkBoxs[index]}" @click.stop="check(index,item.ID)"><b
+                        :class="{'active':checkBoxs[index]}"></b></a>
+                    <!-- 公司评级 -->
+                    <!-- <a href="javascript:;" class="bigIcon"><span class="smallIcon"><b>B+</b></span></a> -->
+                    <a href="javascript:;" class="name">{{item.Name}}</a>
+                  </p>
+                  <p class="downLine"><span class="zuZhi">{{item.SalesManName}}</span><b>({{item.Organization}})</b></span><span
+                      class="address">{{item.Address}}</span></p>
+                  <i v-if="item.IsEmphasis"></i>
+                </div>
+                <div class="contentListBottom">
+                  <i v-if="!item.CreateDate==''">{{item.CreateDate}}</i>
+                  <p v-if="!item.CreateDate==''">{{item.Content}}</p>
+                  <b v-if="!item.CreateDate==''">{{item.UserName}}</b>
+                  <i v-if="item.CreateDate==''">暂无跟单消息</i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </cube-scroll>
       </div>
-      <div class="contentListBottom">
-      <i v-if="!item.CreateDate==''">{{item.CreateDate}}</i>
-      <p v-if="!item.CreateDate==''">{{item.Content}}</p>
-      <b v-if="!item.CreateDate==''">{{item.UserName}}</b>
-      <i v-if="item.CreateDate==''">暂无跟单消息</i>
-      </div>
-      </div>
-      </div>
-      </div>
-      </cube-scroll>
-      </div>
-      </div>
-      
+    </div>
+
     <div class="bottom" v-if="admin">
       <span class="round" :class="{active:checkAllBox}" @click="checkAll(List)"><b :class="{active:checkAllBox}"></b></span>
       <span class="content">已选择{{idList.length}}个家装公司</span>
@@ -185,7 +187,7 @@
         isStatus: [],
         salesArr: [],
         isFoodActive: [],
-        
+
         salesMask: false, //业务员列表
         // 全部分类
         allStateText: [{
@@ -265,10 +267,10 @@
         boxFlag: false,
         startArr: [],
         zmFlag: -1,
-        allClick:true,
-        quanBu:'全部',
-        leftTextColor:true,
-        JobID:[]
+        allClick: true,
+        quanBu: '全部',
+        leftTextColor: true,
+        JobID: []
       }
     },
     computed: {
@@ -463,10 +465,10 @@
               UserId: getCookie('UserId'),
               token: getCookie('token'),
               keyword: this.keyword,
-              StatusID: this.StatusID,//	跟进状态ID
-              TypeID: this.TypeID,//	公司类型ID
-              SaleID: this.SaleID,//业务员ID
-              DealerID: this.DealerID,//经销商ID
+              StatusID: this.StatusID, //	跟进状态ID
+              TypeID: this.TypeID, //	公司类型ID
+              SaleID: this.SaleID, //业务员ID
+              DealerID: this.DealerID, //经销商ID
               page: page || 1
             })
           })
@@ -543,48 +545,48 @@
           if (this.AccessId == -1) {
             this.allText = '分总'
           }
-          if(this.Status.length>0){
+          if (this.Status.length > 0) {
 
           }
-          if(this.Status.length>0){}else{
-          if(index==0){
-            axios({
-                url: this.getHost() + '/Company/UserInfoListById',
-                method: 'post',
-                data: qs.stringify({
-                  UserId: getCookie('UserId'),
-                  token: getCookie('token'),
+          if (this.Status.length > 0) {} else {
+            if (index == 0) {
+              axios({
+                  url: this.getHost() + '/Company/UserInfoListById',
+                  method: 'post',
+                  data: qs.stringify({
+                    UserId: getCookie('UserId'),
+                    token: getCookie('token'),
+                  })
                 })
-              })
-              .then(res => {
-                if (res.data.Status == 1) {
-                  this.Status = res.data.Data.list
-                  this.sortArr =res.data.Data.zmlist
-                  this.Status.forEach((t, i) => {
-                    t.flag = false
-                    t.positionID = 1
-                    this.startArr = this.Status
-                    t.list.forEach((m) => {
-                      m.flag = false
-                      m.positionID = 2
-                      m.list.forEach((q) => {
-                        q.flag = false
-                        q.positionID = 3
-                        q.list.forEach((x) => {
-                          x.flag = false
-                          x.positionID = 4
-                          x.list.forEach((n) => {
-                            n.flag = false
-                            n.positionID = 5
+                .then(res => {
+                  if (res.data.Status == 1) {
+                    this.Status = res.data.Data.list
+                    this.sortArr = res.data.Data.zmlist
+                    this.Status.forEach((t, i) => {
+                      t.flag = false
+                      t.positionID = 1
+                      this.startArr = this.Status
+                      t.list.forEach((m) => {
+                        m.flag = false
+                        m.positionID = 2
+                        m.list.forEach((q) => {
+                          q.flag = false
+                          q.positionID = 3
+                          q.list.forEach((x) => {
+                            x.flag = false
+                            x.positionID = 4
+                            x.list.forEach((n) => {
+                              n.flag = false
+                              n.positionID = 5
+                            })
                           })
                         })
                       })
                     })
-                  })
-               
-                }
 
-              })
+                  }
+
+                })
             }
           }
           this.hasMask[index] = true
@@ -592,8 +594,15 @@
         this.Mask = this.hasMask[index] ? true : false
 
       },
-      //右边全部按钮点击
-      rightAllClick(){
+       //右边全部按钮点击
+       rightAllClick(){
+        if(this.salesNum!=0){
+          this.isFoodActive=[]
+          this.textColor=true
+          this.rightAllText=this.leftAllText
+          this.salesNum=0
+          return false
+        }
         this.Status.forEach((y)=>{
           this.textColor=true
           this.leftTextColor=true
@@ -605,24 +614,23 @@
           if(this.JobID.indexOf(s.JobID)<=-1){
             this.JobID.push(s.JobID)
           }
-          y.list.forEach((d)=>{
-            if(d.JobID==s.JobID){
-           
-
-          }
-          })
          
         })
-        if(JobIDLen>-1){
-          console.log(JobIDLen)
-          console.log(this.leftList.length)
+        if(JobIDLen==-1&&this.leftAllText!=this.rightAllText){
+          this.leftList.splice(JobIDLen)
+            this.positionID.splice(JobIDLen)
+            this.rightIdArr.splice(rightID)
+        console.log(JobIDLen)
+
+        }
+        if(JobIDLen>-1&&this.leftAllText!=this.rightAllText){
+          console.log(JobIDLen,'JobIDLen')
             this.leftActive=-1
             this.leftTextColor=true
             this.textColor=true
             this.leftList.splice(JobIDLen)
             this.positionID.splice(JobIDLen)
             this.rightIdArr.splice(rightID)
-
         }
         
           if (y.JobID == 1) {
@@ -649,7 +657,6 @@
           }
          this.rightAllText=this.leftAllText
         })
-        console.log(this.leftList.length)
 
       },
       //左边全部按钮点击
@@ -687,7 +694,8 @@
         this.allColor = false
         let positionID = this.positionID.indexOf(item.positionID)
         let rightID = this.rightIdArr.indexOf(item.ID)
-        if (this.leftList.length <= 0) {
+        
+        if (this.leftList.length == 0) {
           this.leftList.push(item)
           this.rightIdArr.push(item.ID)
           this.leftActive=-1
@@ -766,7 +774,6 @@
         })
         this.Status = item.list
         this.sortArr = item.zmlist
-        console.log(this.leftList)
       },
       //左边列表的点击
       leftClick(item, index) {
@@ -821,8 +828,6 @@
           })
         }
       },
-
-     
       checkSales(item) {
         this.topHight = event.currentTarget.offsetTop
         this.salesmanFlag = false
@@ -850,21 +855,25 @@
           this.leftTextColor=true
         }
       },
-       // 业务员列表重置
-       resetSales() {
+
+      // 业务员列表重置
+      resetSales() {
         this.isFoodActive = []
         this.SaleID = ''
       },
       //确认业务员
       sureSales() {
         console.log(this.salesNum)
-        if(this.salesNum>0){
-          this.SaleID=this.isFoodActive.join(',')
+        if (this.salesNum > 0) {
+          this.SaleID = this.isFoodActive.join(',')
+        }else{
+          this.statusSelect=this.leftAllText
         }
-        this.DealerID=this.leftList[this.leftList.length-1].ID
+        this.DealerID = this.leftList[this.leftList.length - 1].ID
         this.page = 1
         this.getList()
         this.hasMask = [false, false, false]
+        this.$refs.scroll.scrollTo(0,0)
       },
       //点击全部分类
       checkAllStatus() {
@@ -917,6 +926,7 @@
         this.page = 1
         this.getList()
         this.hasMask = [false, false, false]
+        this.$refs.scroll.scrollTo(0,0)
       },
       // 首字母定位
       namePosition(item, index) {
@@ -934,7 +944,7 @@
         var liHeight = 40 //li的高度
         this.$refs.scrollSale.scrollTo(0, this.scrollToY = -((number) * liHeight), )
       },
-    }
+    },
   }
 
 </script>
@@ -1047,10 +1057,12 @@
     background: #F3CF9D;
     color: #FFFFFF;
   }
+
   .top .topBtn button:nth-child(4) {
     background: #CDDFEE;
     color: #FFFFFF;
   }
+
   .top .search {
     width: 92%;
     height: 44px;
@@ -1232,12 +1244,13 @@
     background-color: #E2C78F;
   }
 
-  .contentListTop i{
-  position: absolute;
+  .contentListTop i {
+    position: absolute;
     top: 0;
     left: 0;
     width: 28px;
     height: 28px;
     border-radius: 6px 3px;
-}
+  }
+
 </style>

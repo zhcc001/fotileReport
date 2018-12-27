@@ -19,17 +19,19 @@
             <img src="./2.png" class="icon" alt="" v-if='hasMask[0]'>
             <img src="./1.png" class="icon" alt="" v-else>
           </div>
+
         </div>
+        <div class="mask" v-show="hasMask[0]"></div>
+
         <i v-if='postShow'></i>
 
         <!-- 时间排序 -->
         <div class="filter" >
-          <div class="timeChange">
+          <div class="timeChange" @click='changeTime()'>
             <span class="filterResult" >申请时间{{shunXuText}}</span>
             <img src="./timeIcon.png" class="timeIcon" alt="">
           </div>
         </div>
-        <div class="mask" v-show="hasMask[0]"></div>
       </div>
 
       <div class="allpostMask" v-show="hasMask[0]">
@@ -126,7 +128,7 @@
         salesArr: [],
         isFoodActive: [],
         salesMask: false, //业务员列表
-        TypeID: '',
+        TypeID: false,
         StatusID: '',
         Keyword: '',
         list: [],
@@ -565,16 +567,15 @@
         this.hasMask[0] = false
         this.StatusID = id
         this.getList()
+        this.$refs.scroll.scrollTo(0,0)
         // this.isShow = true
 
       },
-      styleListActive(index, name,id) {
-        this.styleHasActive = index
-        this.styleSelect = name
-        this.hasMask[1] = false
-        this.TypeID=id
+      // 时间排序
+      changeTime() {
+        this.TypeID=!this.TypeID
         this.getList()
-
+        this.$refs.scroll.scrollTo(0,0)
       },
       getStyleList(){
         axios({
@@ -921,7 +922,6 @@
   margin-top: 1px;
 }
 .allpostMask{
-  height: 40vh;
   background: white;
   position: absolute;
   z-index: 300;

@@ -1097,7 +1097,8 @@
       ...mapMutations({
         setAccessId: 'SET_ACCESSID'
       }),
-    }
+    },
+
   }
 
 </script>
