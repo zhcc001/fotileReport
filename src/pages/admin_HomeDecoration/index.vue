@@ -17,6 +17,7 @@
         <button type="button">已过期
           <span>{{count.Complete}}</span>
         </button>
+        
       </div>
       <div class="search">
         <input type="text" placeholder="请搜索公司名称关键词" v-model="keyword">
@@ -595,12 +596,17 @@
       },
        //右边全部按钮点击
        rightAllClick(){
+         if(this.leftAllText==this.rightAllText){
+          return false
+        }
         this.isFoodActive=[]
         this.SaleID=''
+        
         if(this.salesNum!=0&&this.leftAllText=="全部业务员"){
           this.isFoodActive=[]
           this.textColor=true
           this.rightAllText=this.leftAllText
+          this.statusSelect=this.leftAllText
           this.salesNum=0
           return false
         }
@@ -609,7 +615,7 @@
           
           this.textColor=true
           this.salesNum=0
-          this.statusSelect=this.rightAllText
+          this.statusSelect=this.leftAllText
           return false
         }
         this.Status.forEach((y)=>{
@@ -845,6 +851,7 @@
           if (this.salesNum == 0) {
             this.rightAllText = this.quanBu+"业务员"
             this.leftAllText = this.quanBu+"业务员"
+            this.statusSelect = this.rightAllText
             this.textColor=true
           }
           this.SaleID = this.isFoodActive.join(',')
