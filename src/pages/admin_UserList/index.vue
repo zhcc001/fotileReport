@@ -27,8 +27,8 @@
 
         <!-- 时间排序 -->
         <div class="filter" >
-          <div class="timeChange" @click='changeTime()'>
-            <span class="filterResult" >申请时间{{shunXuText}}</span>
+          <div class="timeChange" @click='handleTimeSort()'>
+            <span class="filterResult" >新增时间{{TypeID==true?'顺序':'逆序'}}</span>
             <img src="./timeIcon.png" class="timeIcon" alt="">
           </div>
         </div>
@@ -50,7 +50,7 @@
         ref="scroll"
         :data="list"
         :options="options"
-        @pulling-up="onPullingUp">
+        @pulling-up="onPullingUp" @pulling-down='onPullingDown'>
     <div class="UserListAll">
       <ul>
         <li v-for="(item,index) in list" :key="index">
@@ -80,6 +80,18 @@
       </ul>
       <empty v-if='emptyFlag'></empty>
     </div>
+    <template slot="pulldown" slot-scope="props">
+      <div v-if="props.pullDownRefresh" class="cube-pulldown-wrapper" :style="props.pullDownStyle">
+        <div v-if="props.beforePullDown" class="before-trigger" :style="{paddingTop: props.bubbleY + 'px'}">
+          <span :class="{rotate: props.bubbleY > 0}">↓</span>
+        </div>
+        <div class="after-trigger" v-else>
+          <div v-show="props.isPullingDown" class="loading">
+            <cube-loading></cube-loading>
+          </div>
+        </div>
+      </div>
+    </template>
  </cube-scroll>
     </div>
   </div>
@@ -111,6 +123,7 @@
     name: 'UserList',
     data() {
       return {
+        IsSort:false,
         leftActive: -1,
         rightActive: -1,
         textColor: true,
@@ -194,7 +207,8 @@
         leftTextColor:true,
         JobID:[],
         shunXuText:'顺序',
-        niXuText:'逆序'
+        niXuText:'逆序',
+        secondStop: 26
 
       }
     },
@@ -205,7 +219,13 @@
       options() {
     return {
       pullUpLoad: this.pullUpLoadObj,
-      scrollbar: true
+      scrollbar: true,
+      pullDownRefresh: {
+            threshold: 60,
+            stop: 44,
+            stopTime: 100,
+            txt: '更新成功'
+          },
     }
   },
   saleOptions() {
@@ -253,6 +273,13 @@
              this.$refs.scroll.forceUpdate()
            }
         },
+        onPullingDown() {
+        setTimeout(() => {
+          this.page=1
+          this.getList(this.page)
+          this.$refs.scroll.scrollTo(0, this.secondStop, 100)
+        }, 1000)
+      },
       deleteShopMask(bool,ID){
         this.deleteShopWarn = bool;
         this.shopID = ID||""
@@ -572,7 +599,12 @@
 
       },
       // 时间排序
-      changeTime() {
+      // changeTime() {
+      //   this.TypeID=!this.TypeID
+      //   this.getList()
+      //   this.$refs.scroll.scrollTo(0,0)
+      // },
+      handleTimeSort(){
         this.TypeID=!this.TypeID
         this.getList()
         this.$refs.scroll.scrollTo(0,0)

@@ -257,7 +257,7 @@ export default {
     margin-top: 30px;
   } */
   .scroll-list-wrap {
-  height: calc(100vh - 100px);
+  height: 94vh;
 }
 #AnnounceList{
   padding: 15px;

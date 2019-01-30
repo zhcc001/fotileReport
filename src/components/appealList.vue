@@ -1,7 +1,7 @@
 <template>
    <div class="home_content" v-if="list.length">
       <div class="focus">
-       最新申诉({{list.length}})
+       最新申诉
       </div>
       <div class="contentList" v-for="(item,index) in list" :key="index" @click="applyDetail(item.ID)">
         <div class="contentListTop">
@@ -14,7 +14,7 @@
             <span @click.stop="noAllow(true,item.ID)" v-if="showBtn">不通过</span>
             <span @click.stop="isAllow(true,item.ID)" v-if="showBtn">审批通过</span>
           </p>
-          <i></i>
+          <!-- <i></i> -->
         </div>
         <div class="contentListBottom">
           <span>业务员{{item.UserName}}</span>
@@ -159,6 +159,8 @@ export default {
   padding-top: 20px;
 }
 .twoLine.twoLineInfo span:nth-child(1){
+  display: block;
+  text-align: left;
   font-size: 16px;
 }
 .twoLine.twoLineInfo span:nth-child(2){
@@ -180,6 +182,10 @@ export default {
   border:1px solid #BFBFBF;
   color:  #BFBFBF !important;
 }
+.contentListTop,.contentListBottom{
+  margin-left: 0;
+}
+
 </style>
 
 

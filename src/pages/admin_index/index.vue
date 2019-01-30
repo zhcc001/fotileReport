@@ -36,6 +36,26 @@
         </ul>
       </div>
     </div>
+    <div class="dataBox">
+      <h5 class="dataTitle">数据报表统计</h5>
+      <div class="dataModel">
+        <div class="business" @click='yeWu()'>
+          <div class="text">
+            <h6>业务统计</h6>
+            <p class="clickDetail">点击查看业务统计详情</p>
+          </div>
+          <img class="sanJiao" src="./sanJiao.png" alt="">
+
+        </div>
+        <div class="sale" @click='xiaoShou()'>
+          <div class="text">
+            <h6>销售统计</h6>
+            <p class="clickDetail">点击查看销售统计详情</p>
+          </div>
+          <img class="sanJiao" src="./sanJiao.png" alt="">
+        </div>
+      </div>
+    </div>
     <div class="nav">
       <ul>
         <li>
@@ -136,10 +156,24 @@ import {loginOut} from "../../utils/loginOut";
             location.replace('/')
         })
       },
+       //跳转业务统计
+       yeWu() {
+        this.$router.push({
+          path: '/businessStatistics',
+
+        })
+      },
+      //跳转销售统计
+      xiaoShou() {
+        this.$router.push({
+          path: '/saleStatistics',
+
+        })
+      },
       ...mapMutations({
       setAccessId: 'SET_ACCESSID'
       })
-    }
+    },
   }
 
 </script>
@@ -344,6 +378,75 @@ import {loginOut} from "../../utils/loginOut";
     color: rgba(77, 77, 77, 1);
     text-align: center;
     padding-top: 14px;
+  }
+  .dataBox {
+    padding: 30px 0;
+    margin-bottom: 10px;
+    background: white;
+  }
+
+  .dataTitle {
+    font-size: 20px;
+    color: #404040;
+    padding-left: 10px;
+    border-left: 2px solid #D5AE61;
+    font-weight: 550;
+    width: 88%;
+    margin: 0 auto;
+    margin-bottom: 24px;
+  }
+
+  .dataModel {
+    width: 88%;
+    margin: 0 auto;
+  }
+
+  .dataModel .business {
+    width: 100%;
+    height: 90px;
+    background: url(/static/dataBg1.png) no-repeat center/contain;
+    /* background-size: 100% 100%;
+    background-position: center; */
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .dataModel h6 {
+    font-size: 18px;
+    color: #4C4C4C;
+    font-weight: 550;
+    margin-bottom: 8px;
+  }
+
+  .clickDetail {
+    font-size: 12px;
+    color: #B1B1B1;
+  }
+
+  .sale {
+    width: 100%;
+    height: 90px;
+    background: url(/static/dataBg2.png) no-repeat center/contain;
+    /* background-size: 100% 100%;
+    background-position: center; */
+    position: relative;
+  }
+
+  .text {
+    position: absolute;
+    right: 0;
+    width: 56%;
+    top: 26px;
+  }
+
+  .sanJiao {
+    position: absolute;
+    width: 9px;
+    height: 16px;
+    right: 16px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
   }
 
 </style>

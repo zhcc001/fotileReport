@@ -1,20 +1,21 @@
 <template>
-  <div id="app">
+  <div id="app" :class='{app:appClass}'>
     <a href="javascript:;" @click="back" id="fixBack" v-show="needBack">
-      <!-- <i class="iconfont icon-fanhui"></i> -->
       <!-- v-show="needBack&&isminprograme" -->
       <span>返回</span>
     </a>
     <keep-alive>
       <router-view v-if="$route.meta.keepAlive">
       </router-view>
-  </keep-alive>
-  
-    <router-view v-if="!$route.meta.keepAlive"/>
+    </keep-alive>
+
+    <router-view v-if="!$route.meta.keepAlive" />
+    <!-- <router-view/> -->
   </div>
 </template>
 
 <script>
+  import eventVue from './js/eventVue.js'
   import {
     mapGetters
   } from 'vuex'
@@ -28,7 +29,9 @@
     data() {
       return {
         isminprograme: false,
-        needBack: false
+        needBack: false,
+        isRouterAlive: true,
+        appClass: false
       }
     },
     computed: {
@@ -42,6 +45,148 @@
       },
       '$route': function (to, from) {
         // this.calc_transitionName(to, from)
+        // 家装公司列表缓存
+
+        if (from.path == '/companyList' && to.path == '/companyDetail') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/companyList' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/companyList' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        // 组员跟进列表
+        if (from.path == '/CompanyFollow' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/CompanyFollow' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/CompanyFollow' && to.path == '/companyDetail') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/CompanyFollow' && to.path == '/SalesmanList') {
+          from.meta.keepAlive = false
+        }
+        // 用户管理
+        if (from.path == '/UserList' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/UserList' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/UserList' && to.path == '/editUser') {
+          from.meta.keepAlive = true
+        }
+
+        // // 我要申诉
+        // if(from.path=='/appealHome'&&to.path=='/home'){
+        //   // from.meta.keepAlive=false
+        //   location.reload()
+        // }
+        // if(from.path=='/appealHome'&&to.path=='/appealDetails'){
+        //   from.meta.keepAlive=true
+        // }
+
+        // 消息中心
+        if (from.path == '/messageCenter' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/messageCenter' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/messageCenter' && to.path == '/companyDetail') {
+          from.meta.keepAlive = true
+        }
+        // 跟进审批
+        if (from.path == '/appealManger' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/appealManger' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/appealManger' && to.path == '/companyDetail') {
+          from.meta.keepAlive = true
+        }
+
+        // 申诉审批
+        if (from.path == '/appeal' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/appeal' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/appeal' && to.path == '/appealDetails') {
+          from.meta.keepAlive = true
+        }
+
+        // 进入组员跟进列表不需要缓存
+        if (from.path == '/CompanyFollow' && to.path == '/myGroup') {
+          from.meta.keepAlive = false
+        }
+        if (from.path == '/CompanyFollow' && to.path == '/companyDetail') {
+          from.meta.keepAlive = true
+        }
+        
+
+
+
+       
+
+         // 销售统计
+         if (from.path == '/saleStatistics' && to.path == '/notRating') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/saleStatistics' && to.path == '/distriRanking') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/saleStatistics' && to.path == '/companyRanking') {
+          from.meta.keepAlive = true
+        }
+
+        if (from.path == '/saleStatistics' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/saleStatistics' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+
+        // 业务统计
+        if (from.path == '/businessStatistics' && to.path == '/noQianYue') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/businessStatistics' && to.path == '/newSale') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/businessStatistics' && to.path == '/waitXuQian') {
+          from.meta.keepAlive = true
+        }
+        if (from.path == '/businessStatistics' && to.path == '/home') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+        if (from.path == '/businessStatistics' && to.path == '/adminIndex') {
+          // from.meta.keepAlive=false
+          location.reload()
+        }
+
+
+
         if (to.name === 'Home' || to.name === 'Login' || to.name === 'AdminIndex') {
           this.needBack = false
         } else {
@@ -50,6 +195,7 @@
       }
     },
     created() {
+      this.move()
       let that = this
 
       function ready() {
@@ -65,13 +211,38 @@
       }
     },
     methods: {
+       /***滑动限制***/
+       stop(){
+        var mo=function(e){e.preventDefault();};
+        document.body.style.overflow='hidden';
+        document.addEventListener("touchmove",mo,false);//禁止页面滑动
+      },
+      /***取消滑动限制***/
+      move(){
+        var mo=function(e){e.preventDefault();};
+        document.body.style.overflow='';//出现滚动条
+        document.removeEventListener("touchmove",mo,false);
+      },
       afterEnter() {},
       back() {
-        this.$router.back()
+        this.appClass=false
+        this.code = this.getSearchParam('code')
+        console.log(this.code)
+        if (this.code) {
+          location.href = "/#/home"
+          // window.location.href='/Home'
+        }else{
+          this.$router.back()
+
+        }
+      },
+      getSearchParam(key) {
+        var ret = location.search.match(new RegExp('(\\?|&)' + key + '=(.*?)(&|$)'))
+        return ret && decodeURIComponent(ret[2])
       },
       initRouter() {
         let AccessId = this.AccessId
-          //-1管理员
+        //-1管理员
         if (AccessId == -1) {
           this.$router.addRoutes(AdminRouer)
           //业务员5
@@ -90,6 +261,7 @@
         }])
       }
     },
+
     mounted() {
       if (this.AccessId) {
         this.initRouter()
@@ -100,9 +272,16 @@
 </script>
 
 <style>
+  .app {
+    overflow: hidden;
+  }
+
   #app {
-    font-size: 14px;
     height: 100vh;
+    font-size: 14px;
+    -webkit-overflow-scrolling: touch;
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
   }
 
   #uploadContract .cube-upload .cube-upload-file,
@@ -175,7 +354,7 @@
     margin: 14% auto !important;
   }
 
-  
+
 
   .cov-date-body[data-v-a9dd0b1a] {
     display: inline-block;
@@ -196,48 +375,96 @@
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
   }
 
-  
 
 
-.cube-btn {
+
+  .cube-btn {
     display: block;
-    margin: 0!important;
-    padding: 0!important;
-    text-align: center!important;
-    white-space: nowrap!important;
-    cursor: pointer!important;
-    font-size: 16px!important;
-    line-height: 1!important;
-    background: none!important;
-    outline: none!important;
-    border: none!important;
-    border-radius: 2px!important;
-    -webkit-box-sizing: border-box!important;
-    box-sizing: border-box!important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    background: none !important;
+    outline: none !important;
+    border: none !important;
+    border-radius: 2px !important;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important;
     background-color: white !important;
-    outline: none!important;
+    outline: none !important;
     cursor: pointer;
-}
+  }
 
 
-.timeChang .cube-btn::after{
-  border:none!important;
-  outline: none!important;
-}
-#button{
-  text-align: center;
-}
-.saleWarp .cube-scroll-content{
+  .timeChang .cube-btn::after {
+    border: none !important;
+    outline: none !important;
+  }
+
+  #button {
+    text-align: center;
+  }
+
+  .saleWarp .cube-scroll-content {
     z-index: 300 !important;
   }
-  
-  .cube-image-preview-item .cube-image-preview-img{
+
+  .cube-image-preview-item .cube-image-preview-img {
     margin: 0 auto;
     max-width: 80% !important;
-    border-radius:12px !important;
+    border-radius: 12px !important;
 
   }
-  .saleWarp .cube-scroll-wrapper{
+
+  .saleWarp .cube-scroll-wrapper {
     background: white;
   }
+
+  .xeLineImg #echarts {
+    width: 350px !important;
+    height: 350px !important;
+    margin: 0 auto;
+  }
+
+  .xeLineImg #echarts>div:nth-child(1) {
+    width: 350px !important;
+    height: 350px !important;
+  }
+  #echarts>div:nth-child(2){
+    z-index: 200 !important;
+  }
+  .xeLineImg #echarts>div>canvas {
+    width: 350px !important;
+    height: 350px !important;
+  }
+
+  .xeLineImg #echarts div span:nth-child(2) {
+    background-color: #8A8D98 !important;
+  }
+
+  .xeLineImg #echarts div span:nth-child(4) {
+    background-color: #DDB971 !important;
+  }
+
+  .gradeBingImg #echarts {
+    width: 160px !important;
+    height: 160px !important;
+  }
+
+  .gradeBingImg #echarts>div:nth-child(1) {
+    width: 160px !important;
+    height: 160px !important;
+  }
+
+  .gradeBingImg #echarts>div>canvas {
+    width: 160px !important;
+    height: 160px !important;
+  }
+
+  /* .waitXuQian .cube-scroll-list-wrapper,.noQianYue .cube-scroll-list-wrapper{
+    min-height: 500px !important;
+  } */
 </style>

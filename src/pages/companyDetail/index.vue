@@ -11,7 +11,7 @@
               <span>{{data.Name}}</span>
             </p>
             <div class="basicText">
-              <p class="person">业务员<span>{{data.UName}}</span></p>
+              <p class="person">业务员<span>{{data.UName}}({{data.Organization}})</span></p>
               <p class="spanText">归属类型<span>{{data.TypeName}}</span></p>
             </div>
 
@@ -27,89 +27,166 @@
           </div>
 
         </div>
+        <div class="grade">
+          <div class="gradeLeft">
+            <span>评级</span>
+          </div>
+          <div class="gradeMid">
+            <p>{{Quarter}}</p>
+            <div class="midDown" v-if='rateObj!=null'>
+              <b><span>{{rate}}</span>级</b>
+              <ol>
+                <li v-for='item in tage'>{{item}}</li>
+              </ol>
+            </div>
+            <b class="nullText" v-else>上一季度暂未评级！</b>
+          </div>
+          <div class="gradeRight">
+            <button type="button" class="editGrade" @click='companyGrade()' v-if='rateObj!=null&&AccessId!=1'>全部评级</button>
+            <button type="button" class="editGrade" @click='companyGrade()' v-if='AccessId==1'>全部评级</button>
+          </div>
+        </div>
         <div class="basicInfoBottom">
           <p>
-            <i><img src="./name.png" alt=""></i>
-            <span>联系人</span>
-            <span class="color">{{data.UserName}}</span>
-            <i class="job"><img src="./job.png" alt=""></i>
-            <span>岗位</span>
-            <span class="color">{{data.JobName}}</span>
+            <span>公司地址</span>
+            <span class="color">{{data.PCAName}}{{data.Address}}</span>
           </p>
           <p>
-            <i><img src="./tel.png" alt=""></i>
-            <span>联系方式</span>
-            <span class="color">{{data.Mobile}}</span>
+            <span>合同时间</span>
+            <span class="color" v-if='data.CoopStartDate&&data.CoopStartDate'>{{data.CoopStartDate}}至{{data.CoopEndDate}}</span>
+            <span class="color" v-if='!data.CoopStartDate&&!data.CoopStartDate'>暂无</span>
           </p>
-          <p>
-            <i><img src="./address.png" alt=""></i>
-            <span>联系地址</span>
-            <span class="color">{{data.UserAddress}}</span>
-          </p>
-          <p>
-            <i><img src="./photo.png" alt=""></i>
-            <span>门头照</span>
-            <span class="ImageBtn" v-if="data.HeadImageUrl==''">查看门头照</span>
-            <span class="ImageBtn active" v-if="data.HeadImageUrl" @click="getImg(data.HeadImageUrl)">查看门头照</span>
-          </p>
+
           <div v-if="isExpend" class="otherInfo">
             <p>
-              <span>公司类型</span>
-              <span class="color">{{data.CategoryName}}</span>
+              <span>联系人</span>
+              <span class="color" v-if='data.UserName'>{{data.UserName}}</span>
+              <span class="color" v-if='!data.UserName'>暂无</span>
+
+            </p>
+            <p>
+              <span>联系方式</span>
+              <span class="color" v-if='data.Mobile'>{{data.Mobile}}</span>
+              <span class="color" v-if='!data.Mobile'>暂无</span>
             </p>
             <p>
               <span>公司简称</span>
               <span class="color">{{data.ShortName}}</span>
             </p>
             <p>
-              <span>公司地址</span>
-              <span class="color">{{data.PCAName}}{{data.Address}}</span>
+              <span>公司类型</span>
+              <span class="color">{{data.CategoryName}}</span>
             </p>
+            <p>
+              <span>门头照</span>
+              <span class="ImageBtn" v-if="data.HeadImageUrl==''">查看门头照</span>
+              <span class="ImageBtn active" v-if="data.HeadImageUrl" @click="getImg(data.HeadImageUrl)">查看门头照</span>
+            </p>
+
+
+
           </div>
 
           <p id="expend" @click="handleExpend"><span>{{expendWord}}</span></p>
         </div>
 
       </div>
-      <!-- 跟进信息 -->
-      <div class="followInfo">
-        <div class="followDays">
-          <p>当前已跟进<span>{{data.NowFollowDay}}</span>/{{data.FollowDay}}天</p>
-          <a href="javascript:;" @click="approvalRecord(ID)">审批记录>></a>
-        </div>
-        <p class="uploadAuthorized">
-          <span class="round" :class="{'active':btnActive}"><i :class="{'active':btnActive}">1</i></span>
-          <span class="statusDetail" :class="{'active':btnActive}">洽谈成功，申请授权</span>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btnActive}" v-if="applyshou" @click="applyAuthorized(1)">申请授权</a>
-          <a href="javascript:;" class="applyBtn active" v-if="!applyshou" @click="applyAuthorized(2)">查看授权凭证</a>
-          <!-- <span class="applyStatus active" >审核通过</span> -->
-        </p>
-        <span class="line"></span>
-        <p class="uploadContract">
-          <span class="round" :class="{'active':btn2Active}"><i :class="{'active':btn2Active}">2</i></span>
-          <span class="statusDetail" :class="{'active':btn2Active}">授权书照片</span>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btn2Active}" v-if="applyshu" @click="btn2Active && uploadContract(1)">上传授权书</a>
-          <a href="javascript:;" class="applyBtn active" v-if="!applyshu" @click="getImg(data.AuthBookImage)">查看授权书</a>
-          <span class="applyStatus active" v-if="reApplyshu" @click="uploadContract(1)">重新上传</span>
-        </p>
-        <span class="line"></span>
-        <p class="applyAuthorized">
-          <span class="round" :class="{'active':btn3Active}"><i :class="{'active':btn3Active}">3</i></span>
-          <span class="statusDetail" :class="{'active':btn3Active}">签约成功，上传合同</span>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btn3Active}" v-if="applyhe" @click="uploadContract(2)">上传签约合同</a>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btn3Active}" v-if="applquyu">上传签约合同</a>
-          <a href="javascript:;" class="applyBtn active" v-if="!applyhe&&!applquyu" @click="showImagePreviewHT(data.ContractImage)">查看合同</a>
-        </p>
-        <span class="line"></span>
-        <p class="uploadContract">
-          <span class="round" :class="{'active':btn4Active}"><i :class="{'active':btn4Active}">4</i></span>
-          <span class="statusDetail" :class="{'active':btn4Active}">上传签约凭证</span>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btn4Active}" @click="uploadContract(4)" v-if='applyqy'>上传费用凭证</a>
-          <a href="javascript:;" class="applyBtn" :class="{'active':btn4Active}" v-if='freeBtn'>上传费用凭证</a>
-          <a href="javascript:;" class="applyBtn active" v-if="!applyqy&&!freeBtn" @click="showImagePreviewPZ(data.ExpenseVoucherList)">查看费用凭证</a>
-          <span class="applyStatus active" v-if="reApplyqy" @click="uploadContract(4)">编辑上传</span>
-        </p>
+      <!-- 卡片 -->
+      <div class="cube">
+        <swiper :options="swiperOption" ref="mySwiper" :not-next-tick="notNextTick">
+          <swiper-slide v-if="swiperRe.Status !== ''&&swiperRe.Status !== '-2'&&flag">
+            <div class="followInfo followInfoBanner applyRenewal flex height" @click="linkDetail(swiperRe.RenewId)">
+              <p class="flex" style="margin-top:20px;">
+                <span>{{swiperReWord}}</span>
+              </p>
+              <button>查看详情</button>
+            </div>
+          </swiper-slide>
+          <swiper-slide v-if="swiperRe.Status === '-2'&&AccessId==5&&(data.UserID == getCookie('UserId'))">
+            <div class="followInfo followInfoBanner applyRenewal flex height" @click="linkDetail(swiperRe.RenewId)">
+              <p class="flex" style="margin-top:20px;">
+                <img src="./add.png" alt="">
+                <span>{{swiperReWord}}</span>
+              </p>
+              <img src="./biaoQian.png" alt="" class="leftIcon">
+            </div>
+          </swiper-slide>
+          <swiper-slide v-for="(slide,index) in swiperSlides" :key="index" :class="{'swiper-no-swiping':infoExtend !== -1}">
+            <div class="followInfo followInfoBanner" :class="{marginLeft7:index===0,marginLeft5:index!==0,height:infoExtend == -1}">
+              <div class="followDays">
+                <p v-if="slide.Status === 1 || slide.Status === 2">当前已跟进<span>{{slide.NowFollowDay}}</span>/{{slide.FollowDay}}天</p>
+                <p v-if="slide.Status === 3">合同剩余时间<span>{{slide.EndTime}}</span>天</p>
+                <p v-if="slide.Status === -3">历史合同<span style="font-size:10px;">（{{slide.CoopStartDate}} ~
+                    {{slide.CoopEndDate}}）</span></p>
+                <a href="javascript:;" @click="approvalRecord(ID,slide.ID)">审批记录>></a>
+              </div>
+              <p class="uploadAuthorized" v-if="slide.RenewID&&(infoExtend == index)" @click="linkDetail(slide.RenewID)">
+                <a class='flex'>
+                  <span class="round">
+                    <i>0</i>
+                  </span>
+                  <span class="statusDetail">续签记录</span>
+                </a>
+                <a href="javascript:;" class="applyBtn active">查看续签记录</a>
+                <!-- <span class="applyStatus active" >审核通过</span> -->
+              </p>
+              <span class="line" v-if="slide.RenewID&&infoExtend == index"></span>
+              <p class="uploadAuthorized" v-if="slide.Status == 1 || (infoExtend == index)">
+                <a class='flex'>
+                  <span class="round" :class="{'active':slide.Status == 1}">
+                    <i :class="{'active':slide.Status == 1}">1</i>
+                  </span>
+                  <span class="statusDetail" :class="{'active':slide.Status == 1}">互有意向，申请授权</span>
+                </a>
+                <a href="javascript:;" class="applyBtn" v-if="!slide.IsShowLook" :class="{'active':slide.Status!=3&&stylePlay == ''&&AccessId == 5 &&(data.UserID == getCookie('UserId'))}"
+                  @click="stylePlay == ''&&AccessId == 5 && (data.UserID == getCookie('UserId')) && applyAuthorized(1)">申请授权</a>
+                <a href="javascript:;" class="applyBtn active" v-else @click="applyAuthorized(2)">查看授权凭证</a>
+                <!-- <span class="applyStatus active" >审核通过</span> -->
+              </p>
+              <span class="line" v-if="infoExtend == index"></span>
+              <p class="uploadContract" v-if="(slide.Status == 2&&!slide.AuthBookImage) || (infoExtend ==index)">
+                <a class='flex'>
+                  <span class="round" :class="{'active':slide.Status == 2&&!slide.AuthBookImage}"><i :class="{'active':slide.Status == 2&&!slide.AuthBookImage}">2</i></span>
+                  <span class="statusDetail" :class="{'active':slide.Status == 2&&!slide.AuthBookImage}">授权书照片</span>
+                </a>
+                <a href="javascript:;" class="applyBtn" v-if="!slide.AuthBookImage" :class="{'active':slide.Status==2&&AccessId == 3}"
+                  @click="slide.Status==2&&AccessId == 3 && uploadContract(1)">上传授权书</a>
+                <a href="javascript:;" class="applyBtn active" v-else @click="getImg(slide.AuthBookImage)">查看授权书</a>
+                <span class="applyStatus active" v-if="slide.AuthBookImage&&AccessId == 3" @click="uploadContract(1)">重新上传</span>
+              </p>
+              <span class="line" v-if="infoExtend == index"></span>
+              <p class="applyAuthorized" v-if="(slide.Status == 2&&slide.AuthBookImage) || (infoExtend == index)">
+                <a class='flex'>
+                  <span class="round" :class="{'active':slide.Status == 2&&slide.AuthBookImage }"><i :class="{'active':slide.Status == 2&&slide.AuthBookImage}">3</i></span>
+                  <span class="statusDetail" :class="{'active':slide.Status == 2&&slide.AuthBookImage}">签约成功，上传合同</span>
+                </a>
+                <a href="javascript:;" class="applyBtn" v-if="!slide.IsShowContract" :class="{'active':slide.Status == 2&&slide.AuthBookImage&&AccessId == 5 &&(data.UserID == getCookie('UserId'))}"
+                  @click="slide.Status == 2&&slide.AuthBookImage&&AccessId == 5 &&(data.UserID == getCookie('UserId'))&&uploadContract(2)">上传签约合同</a>
+                <!-- <a href="javascript:;" class="applyBtn" :class="{'active':btn3Active}" v-if="applquyu">上传签约合同</a> -->
+                <a href="javascript:;" class="applyBtn active" v-else @click="showImagePreviewHT(slide.ContractImage)">查看合同</a>
+              </p>
+              <span class="line" v-if="infoExtend == index"></span>
+              <p class="uploadContract" v-if="(slide.Status == 3&&slide.ContractImage !='') || (infoExtend == index) ||slide.Status == -3">
+                <a class='flex'>
+                  <span class="round" :class="{'active':slide.Status == 3&&slide.ContractImage !=''||slide.Status == -3}"><i
+                      :class="{'active':slide.Status == 3&&slide.ContractImage !=''||slide.Status == -3}">4</i></span>
+                  <span class="statusDetail" :class="{'active':slide.Status == 3&&slide.ContractImage !=''||slide.Status == -3}">上传签约凭证</span>
+                </a>
+                <a href="javascript:;" class="applyBtn" v-if="!slide.ExpenseVoucherList" :class="{'active':slide.Status == 3&&slide.ContractImage !=''&&AccessId == 5 &&(data.UserID == getCookie('UserId'))}"
+                  @click="slide.Status == 3&&slide.ContractImage !=''&&AccessId == 5 &&(data.UserID == getCookie('UserId'))&&uploadContract(4,slide.ID)">上传费用凭证</a>
+                <!-- <a href="javascript:;" class="applyBtn" :class="{'active':btn4Active}" v-if="slide.Status == 3&&slide.ExpenseVoucherList==''&&AccessId!==5">上传费用凭证</a> -->
+                <a href="javascript:;" class="applyBtn active" v-else @click="showImagePreviewPZ(slide.ExpenseVoucherList)">查看费用凭证</a>
+                <span class="applyStatus active" v-if="(slide.ExpenseVoucherList&&AccessId==5&&(data.UserID == getCookie('UserId')))&&slide.Status != -3"
+                  @click="uploadContract(4,slide.ID)">编辑上传</span>
+              </p>
+              <p class="handleExtend flex" @click="handleInfoExtend(slide,index)">{{infoExtendWord}}</p>
+              <img src="./biaoQian.png" alt="" class="leftIcon">
+            </div>
+          </swiper-slide>
+        </swiper>
       </div>
+      <!-- <router-link to='/test'>测试</router-link> -->
+
       <!-- 跟单时间线 -->
       <div class="followTime">
         <div class="followTimeTop">
@@ -129,9 +206,9 @@
             </p>
             <div class="detail">{{item.Content}}</div>
             <div class="timeLineImg" @click="getTimeImg(item.Image)">
-              <img :src="getImgHost()+item.Image1" alt="" v-if="item.Image1!=''" >
-              <img :src="getImgHost()+item.Image2" alt="" v-if="item.Image2!=''" >
-              <img :src="getImgHost()+item.Image3" alt="" v-if="item.Image3!=''" >
+              <img :src="getImgHost()+item.Image1" alt="" v-if="item.Image1!=''">
+              <img :src="getImgHost()+item.Image2" alt="" v-if="item.Image2!=''">
+              <img :src="getImgHost()+item.Image3" alt="" v-if="item.Image3!=''">
             </div>
           </div>
           <div class="infoNull" v-if="timeList.length==0">
@@ -284,6 +361,7 @@
   export default {
     data() {
       return {
+        flag: false,
         freeBtn: false,
         applyqy: true, //签约凭证
         swiperOption: {
@@ -374,35 +452,142 @@
         ExpenseVoucherList: '', //费用凭证
         imgs: [],
         imgMaskArrHT: [],
-        imgMaskArrPZ:[],
-        timeLineImg:[],
-
+        imgMaskArrPZ: [],
+        timeLineImg: [],
+        notNextTick: true,
+        swiperOption: {
+          slidesPerView: 1.05,
+          spaceBetween: -5,
+          centeredSlides: true,
+          noSwiping: true,
+          observer: true,
+          observeParents: true,
+          // loop:true,
+          // initialSlide:2,
+        },
+        swiperSlides: [],
+        infoExtend: -1,
+        infoExtendWord: '展开',
+        swiperRe: {},
+        Quarter: '',
+        quarter: {
+          'first': '第一季度 01月～03月',
+          'second': '第二季度 04月～06月',
+          'third': '第三季度 07月～09月',
+          'fourth': '第四季度 10月～12月',
+        },
+        rate: '',
+        rateObj: {},
+        tage: [],
       }
 
     },
     created() {
-
+      sessionStorage.removeItem('_info')
       localStorage.removeItem("companyId")
       this.stylePlay = this.$route.query.stylePlay || ""
       this.ID = this.$route.query.id
       this.showModel()
       this.getTimeLine(this.ID)
       this.getComplete(this.ID)
-
-
+      this.getCompanyContractList(this.ID)
     },
     computed: {
+      swiperReWord: function () {
+        if (this.swiperRe.Status == 0) {
+          return '续签申请中'
+        } else if (this.swiperRe.Status == -1) {
+          return '续签申请失败'
+        } else if (this.swiperRe.Status == 1) {
+          return '续签申请成功'
+        } else if (this.swiperRe.Status == -2) {
+          return '申请续签'
+        }
+      },
       ...mapGetters([
         'AccessId'
       ]),
       // swiper,
       // swiperSlide,
-      // swiper() {
-      //   return this.$refs.mySwiper.swiper
-      // }
+      swiper() {
+        return this.$refs.mySwiper.swiper
+      }
     },
-    
+    components: {
+      swiper,
+      swiperSlide
+    },
+    mounted() {
+      // console.log(this.swiper);
+      // this.swiper.slideTo(2)
+    },
     methods: {
+      linkDetail(id) {
+        if (this.swiperRe.Status === '-2') {
+          const _info = {
+            '_companyName': this.data.Name,
+            '_UName': this.data.UName,
+            '_companyId': this.ID
+          }
+          sessionStorage.setItem('_info', JSON.stringify(_info))
+          this.$router.push({
+            path: '/applyRenewal'
+          })
+        } else {
+          this.$router.push({
+            path: '/renewalDetail',
+            query: {
+              reId: id,
+              companyId: this.ID
+            }
+          })
+        }
+      },
+      getCompanyContractList(id) {
+        axios({
+            url: this.getHost() + '/Company/CompanyContractListById',
+            method: 'post',
+            data: qs.stringify({
+              UserId: getCookie('UserId'),
+              token: getCookie('token'),
+              Id: id
+            })
+          })
+          .then(res => {
+            if (res.data.Status === 1) {
+              this.swiperSlides = res.data.Data.list
+              this.swiperRe = res.data.Data.model
+              if (this.swiperRe.Status !== '' && this.swiperRe.Status !== '-2') {
+                this.flag = true
+              }
+            } else if (res.data.Status < 0) {
+              this.getToast("登录失效，请重新登录", 'warn')
+              setTimeout(() => {
+                this.delCookie("UserId")
+                this.delCookie("token")
+                this.setAccessId('')
+                location.replace('/')
+              }, 2000);
+            } else {
+              this.getToast(res.data.Message, 'warn')
+            }
+          })
+          .catch(err => {
+            alert(err)
+          })
+      },
+      handleInfoExtend(slide, index) {
+        if (this.infoExtend === index) {
+          this.infoExtend = -1
+          this.infoExtendWord = "展开"
+        } else {
+          this.infoExtend = index
+          this.infoExtendWord = "收起"
+        }
+        if (this.infoExtend) {
+          this.slide = slide
+        }
+      },
       deleteSelect() {
         if (this.type == 1) {
           this.deleteTimeLine()
@@ -562,6 +747,29 @@
           .then(res => {
             if (res.data.Status === 1) {
               this.data = res.data.Data
+
+              console.log(this.rateObj)
+              if (res.data.Data.Rate == null) {
+                this.rateObj = null
+              } else {
+                this.rateObj = res.data.Data.Rate
+                this.rate = this.rateObj.Rate
+                let linShiArr = this.rateObj.Tag
+                if (linShiArr != '') {
+                  this.tage = linShiArr.split(',')
+                }
+                if (this.rateObj.Quarter == 1) {
+                  this.Quarter = this.quarter.first
+                } else if (this.rateObj.Quarter == 2) {
+                  this.Quarter = this.quarter.second
+                } else if (this.rateObj.Quarter == 3) {
+                  this.Quarter = this.quarter.third
+                } else if (this.rateObj.Quarter == 4) {
+                  this.Quarter = this.quarter.fourth
+                }
+
+              }
+
               //公司状态
               // 是否为已签约
               if (this.data.Status == 3) {
@@ -846,24 +1054,26 @@
           query: {
             id: this.ID,
             month: this.complete.Month,
-            year: ""
+            year: "",
+            enter: 1,
           }
         })
       },
-      getTimeImg(src){
+      getTimeImg(src) {
+        this.timeLineImg = []
         this.$createImagePreview().remove()
         this.imgArr = src.split(',')
         this.imgArr.forEach((item, index) => {
           let itemSrc = this.getImgHost() + item
-          let itemSrcId= this.timeLineImg.indexOf(itemSrc)
+          let itemSrcId = this.timeLineImg.indexOf(itemSrc)
           if (itemSrcId < 0) {
             this.timeLineImg.push(this.getImgHost() + item)
           }
         });
         this.$createImagePreview({
           imgs: this.timeLineImg,
-          zIndex:10000,
-          preventDefault:false
+          zIndex: 10000,
+          preventDefault: false
         }).show()
       },
       getImg(src) {
@@ -872,8 +1082,8 @@
         console.log(this.src)
         this.$createImagePreview({
           imgs: this.src,
-          zIndex:10000,
-          preventDefault:false
+          zIndex: 10000,
+          preventDefault: false
         }).show()
       },
       showImagePreviewHT(src) {
@@ -881,15 +1091,15 @@
         this.imgArr = src.split(',')
         this.imgArr.forEach((item, index) => {
           let itemSrc = this.getImgHost() + item
-          let itemSrcId= this.imgMaskArrHT.indexOf(itemSrc)
+          let itemSrcId = this.imgMaskArrHT.indexOf(itemSrc)
           if (itemSrcId < 0) {
             this.imgMaskArrHT.push(this.getImgHost() + item)
           }
         });
         this.$createImagePreview({
           imgs: this.imgMaskArrHT,
-          zIndex:10000,
-          preventDefault:false
+          zIndex: 10000,
+          preventDefault: false
         }).show()
       },
       showImagePreviewPZ(src) {
@@ -904,8 +1114,8 @@
         });
         this.$createImagePreview({
           imgs: this.imgMaskArrPZ,
-          zIndex:10000,
-          preventDefault:false
+          zIndex: 10000,
+          preventDefault: false
         }).show()
       },
       imgMask() {
@@ -962,10 +1172,13 @@
           }
         })
       },
-      approvalRecord(ID) {
+      approvalRecord(ID, reId) {
         localStorage.setItem("companyId", ID)
         this.$router.push({
-          path: '/approvalRecord'
+          path: '/approvalRecord',
+          query: {
+            reId
+          }
         })
 
       },
@@ -986,16 +1199,24 @@
       //上传合同
       //1授权书
       //2合同
-      uploadContract(num) {
-        if (this.btn3Active || this.btn2Active || this.btn4Active) {
-          this.$router.push({
-            path: '/uploadContract',
-            query: {
-              id: this.ID,
-              style: num
-            }
-          })
+      uploadContract(num, reId) {
+        let params = {}
+        if (num == 4) {
+          params = {
+            id: this.ID,
+            style: num,
+            reId: reId
+          }
+        } else {
+          params = {
+            id: this.ID,
+            style: num
+          }
         }
+        this.$router.push({
+          path: '/uploadContract',
+          query: params
+        })
       },
 
       //放弃跟进
@@ -1094,6 +1315,16 @@
             }
           })
       },
+      // 公司评级
+      companyGrade() {
+        this.$router.push({
+          path: '/grade',
+          query: {
+            id: this.ID
+          }
+        })
+
+      },
       ...mapMutations({
         setAccessId: 'SET_ACCESSID'
       }),
@@ -1106,590 +1337,6 @@
   @import '../../common/mask.css';
   @import '../../common/input.css';
   @import 'swiper/dist/css/swiper.css';
-
-  #mask .img {
-    width: 80%;
-  }
-
-  #mask .img img {
-    width: 100%;
-  }
-
-  .btn {
-    margin-top: 15px;
-  }
-
-  .title {
-    margin-bottom: 15px;
-  }
-
-  .otherInfo {
-    margin-top: 15px;
-    border-top: 1px solid #f0f0f0;
-  }
-
-  .otherInfo p {
-    margin-bottom: 10px;
-    height: 25px;
-  }
-
-  .basicInfoBottom .otherInfo p :nth-child(2) {
-    width: auto;
-  }
-
-  #companyDetail {
-    width: 100%;
-  }
-
-  /* 基础信息 */
-  .contetn {
-    padding: 15px;
-    box-sizing: border-box;
-
-  }
-
-  .basicInfo,
-  .followInfo,
-  .followTime,
-  .competition,
-  .shopInfo {
-    background-color: #fff;
-    width: 100%;
-    border-radius: 4px;
-    padding: 0 15px 10px;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-  }
-
-  .basicInfoTop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid #f0f0f0;
-    position: relative;
-  }
-
-  .basic {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    width: 0;
-    flex: 1;
-
-  }
-
-  .status {
-    width: 80%;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
-
-  .status span:first-child {
-    padding: 0 10px;
-    background-color: #F6EAD4;
-    color: #BB9F61;
-    border-radius: 4px;
-    height: 20px;
-    display: inline-block;
-    line-height: 20px;
-  }
-
-  .status span:nth-child(2) {
-    font-size: 16px;
-    font-weight: 600;
-    margin-left: 5px;
-    width: 70%;
-    word-break: break-all;
-    line-height: 20px;
-  }
-
-  .person {
-    color: black;
-    font-size: 12px;
-    margin-right: 16px;
-  }
-
-  .person span {
-    color: #999999;
-    margin-left: 10px;
-  }
-
-  .topIcon {
-    /* width: 80px; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 12px;
-    right: -10px;
-  }
-
-  .topIcon span {
-    flex: 1;
-  }
-
-  .topIcon span img {
-    width: 33px;
-  }
-
-  .basicInfoBottom {
-    margin-top: 15px;
-    font-size: 12px;
-    color: #666666;
-    min-height: 120px;
-  }
-
-  .basicInfoBottom p {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-  }
-
-  .basicInfoBottom p i img {
-    width: 16px;
-  }
-
-  .basicInfoBottom p i {
-    margin-right: 5px;
-    display: flex;
-    align-items: center;
-    height: 100%;
-  }
-
-  .job {
-    margin-left: 35px;
-  }
-
-  .job img {
-    width: 12px !important;
-  }
-
-  .basicInfoBottom p span {
-    display: inline-block;
-    margin-right: 10px;
-
-  }
-
-  .basicInfoBottom p :nth-child(2) {
-    display: flex;
-    width: 60px;
-  }
-
-  .ImageBtn {
-    background-color: #ccc;
-    padding: 5px;
-    border-radius: 4px;
-    color: #fff
-  }
-
-  .ImageBtn.active {
-    background-color: rgba(226, 199, 143, 1);
-  }
-
-  .color {
-    color: rgb(83, 78, 78);
-  }
-
-  .color.active {
-    color: #FFFFFF;
-    padding: 0 20px;
-    line-height: 24px;
-    background: rgba(226, 199, 143, 1);
-    border-radius: 4px;
-  }
-
-  #expend {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-  }
-
-  #expend span {
-    width: 0;
-    flex-grow: 1;
-    text-align: right;
-    color: #4d4d4d;
-    font-size: 12px;
-  }
-
-  /* 跟进信息 */
-  .followInfo {
-    padding-bottom: 15px;
-  }
-
-  .followDays {
-    display: flex;
-    align-items: center;
-    padding: 15px 0;
-  }
-
-  .followDays p {
-    width: 0;
-    flex-grow: 1;
-    font-size: 16px;
-    font-weight: 500;
-    color: #4d4d4d;
-    display: flex;
-    align-items: center;
-  }
-
-  .followDays p span {
-    font-size: 20px;
-    color: #BB9F61;
-  }
-
-  .followDays a {
-    color: #BB9F61;
-  }
-
-  .applyAuthorized,
-  .uploadAuthorized,
-  .uploadContract {
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    color: #ccc;
-  }
-
-  .round {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 11px;
-    border: 1px solid #CCC;
-    margin-right: 10px;
-  }
-
-  .round i {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 9px;
-    background-color: #ccc;
-    color: #fff;
-  }
-
-  .round.active {
-    border: 1px solid #BB9F61;
-  }
-
-  .round i.active {
-    background-color: #BB9F61;
-  }
-
-  .applyBtn {
-    width: 85px;
-    height: 30px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    color: #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 5px;
-  }
-
-  .applyStatus {
-    width: 0;
-    flex-grow: 1;
-    text-align: right;
-  }
-
-  .line {
-    display: flex;
-    height: 32px;
-    width: 10px;
-    border-left: 1px dotted #ccc;
-    margin-left: 11px;
-  }
-
-  .applyBtn.active {
-    border: 1px solid #BB9F61;
-    color: #BB9F61;
-  }
-
-  .statusDetail {
-    width: 108px;
-  }
-
-  .statusDetail.active,
-  .applyStatus.active {
-    color: #666;
-  }
-
-  .applyStatus.active {
-    color: #9c9c9c;
-  }
-
-  /* 跟单时间线 */
-
-  .followTimeTop,
-  .competitionNum {
-    display: flex;
-    align-items: center;
-    padding-top: 10px;
-    margin-bottom: 10px;
-  }
-
-  .followTimeTop p {
-    width: 0;
-    flex-grow: 1;
-    color: #4d4d4d;
-  }
-
-  .followTimeTop p span {
-    font-size: 16px;
-  }
-
-  .followTimeTop p span:nth-child(2) {
-    float: right;
-  }
-
-  .followTimeDetail {
-    border: 1px solid #BB9F61;
-    margin-top: 10px;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-
-  .followTimeDetail .Date {
-    margin-bottom: 10px;
-    color: #666;
-    display: flex;
-    align-items: center;
-  }
-
-  .followTimeDetail .Date span:nth-child(2) {
-    width: 0;
-    flex-grow: 1;
-    margin-left: 5px;
-    font-weight: 600;
-  }
-
-  .followTimeDetail .Date i {
-    display: flex;
-    justify-content: center;
-  }
-
-  .followTimeDetail .Date i img {
-    width: 40px;
-    height: 27px;
-  }
-
-  .followTimeDetail .detail {
-    /* height: 20px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis; */
-    color: #999;
-    margin-bottom: 10px;
-  }
-
-  /* .timeLineImg{
-  display: flex;
-  justify-content: center;
-  align-items: center
-} */
-  .timeLineImg img {
-    width: 80px;
-    height: 80px;
-    margin-right: 10px;
-  }
-
-  /* 竞品分析 */
-
-  .followDays .month {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    background-color: #F6EAD4;
-    border-radius: 4px;
-    padding: 0 10px;
-    height: 20px;
-    margin-left: 10px;
-  }
-
-  .competitionInfo {
-    display: flex;
-    padding: 10px;
-    border-top: 4px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .competitionInfo p {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    flex-grow: 1;
-    border-right: 1px solid #f0f0f0;
-  }
-
-  .competitionInfo p:last-child {
-    border: none;
-  }
-
-  .competitionInfo p span:nth-child(1) {
-    margin-bottom: 10px;
-    color: #808080;
-  }
-
-  .competitionInfo p span:nth-child(2) {
-    color: #000;
-  }
-
-  .competitionNum p {
-    height: 35px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    color: #808080;
-  }
-
-  .competitionNum p span {
-    color: #000;
-  }
-
-  .competitionNum p:nth-child(1),
-  .competitionNum p:nth-child(2) {
-    border-right: 1px solid #f0f0f0;
-  }
-
-  #button {
-    background-image: none;
-    border: 1px solid #BB9F61;
-    color: #BB9F61;
-  }
-
-  /* 直营店信息 */
-  .shopInfo .followDays {
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .shopInfo .followDays span,
-  .followTimeTop span:nth-child(2) {
-    font-size: 12px;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-
-  .upload {
-    background-color: #ccc;
-
-    color: #fff;
-    margin-right: 10px;
-  }
-
-  .upload.noImg {
-    background-color: #E2C78F;
-  }
-
-  .reUpload {
-    color: #E2C78F;
-    border: 1px solid #E2C78F;
-  }
-
-  .ShopMsg {
-    height: 140px;
-    font-size: 28px;
-    color: #ccc;
-    font-weight: 700;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
-
-  /* <div class="ShopDetailInfo">
-        <p>直营门店1<span>门店地门店地址门店地址址门店地址</span><i><img src="./delete.png" alt=""></i></p>
-        <p>直营门店2<span>门店地门店地址门店地址址门店地址</span> <i><img src="./delete.png" alt=""></i></p>
-      </div> */
-  .ShopDetailInfo p {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-bottom: 1px solid #f0f0f0;
-    height: 45px;
-  }
-
-  .ShopDetailInfo p span {
-    width: 0;
-    flex-grow: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-left: 10px;
-    color: #a7a7a7;
-  }
-
-  .ShopDetailInfo p i {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .ShopDetailInfo p img {
-    width: 40px;
-  }
-
-  .addShop {
-    justify-content: center;
-    border: none !important;
-  }
-
-  .infoNull {
-    color: #ccc;
-    font-size: 28px;
-    font-weight: 600;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;
-    border-top: 4px solid #f0f0f0;
-  }
-
-  .swiperMask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.6);
-    width: 100%;
-    height: 100%;
-  }
-
-  .swiperMask img {
-    display: block;
-    width: 74%;
-    margin: 0 auto;
-  }
-
-  .closeSwiper {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    width: 40px;
-    height: 4px;
-    z-index: 99;
-  }
-
-  .basicText {
-    display: flex;
-    font-size: 12px;
-    color: black;
-  }
-
-  .spanText span {
-    font-size: 12px;
-    margin-left: 10px;
-    color: #999999;
-  }
+  @import './index.css';
 
 </style>

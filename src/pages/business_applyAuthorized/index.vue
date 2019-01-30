@@ -323,12 +323,13 @@
               if (res.data.Status === 1) {
                 this.getToast("提交成功", 'correct')
                 setTimeout(() => {
-                  this.$router.push({
+                  this.$router.replace({
                     path: '/companyDetail',
                     query: {
                       id: this.ID
                     }
                   })
+                  this.$router.go(-1)
 
                 }, 2000);
               } else if (res.data.Status < 0) {

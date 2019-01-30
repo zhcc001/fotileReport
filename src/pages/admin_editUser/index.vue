@@ -8,11 +8,11 @@
       </div>
       <div class="input" >
         <span>职位</span>
-        <input type="text" v-model='JobInfo' readonly :JobId='JobId'>
+        <input type="text" v-model='JobInfo' readonly="readonly" unselectable="on" onfocus="this.blur()" :JobId='JobId'>
       </div>
       <div class="input">
         <span>上级</span>
-        <input type="text" placeholder="请选择负责人" v-model="LastInfo" readonly
+        <input type="text" placeholder="请选择负责人" v-model="LastInfo" readonly="readonly" unselectable="on" onfocus="this.blur()"
         :LastId='LastId'>
       </div>
        <div class="input">
@@ -23,11 +23,11 @@
      <div class="info">
       <div class="input">
         <span>手机号码</span>
-        <input type="text" placeholder="请输入员工手机号" v-model="tel" readonly>
+        <input type="text" placeholder="请输入员工手机号" v-model="tel" readonly="readonly" unselectable="on" onfocus="this.blur()">
       </div>
        <div class="input">
         <span>小组信息</span>
-        <input type="text"  v-model="group" readonly>
+        <input type="text"  v-model="group" readonly="readonly" unselectable="on" onfocus="this.blur()">
       </div>
       <div class="input">
         <span>密码</span>
@@ -141,13 +141,10 @@ export default {
         .then(res=>{
           console.log(res)
           if (res.data.Status===1) {
-            this.getToast("编辑用户成功，跳转首页",'warn')
+            this.getToast("编辑用户成功",'warn')
             setTimeout(() => {
-              if (this.AccessId==-1) {
-                this.$router.push({path:'/adminIndex'})
-              }else{
-                this.$router.push({path:'/home'})
-              }  
+                this.$router.replace({path:'/UserList'})
+                this.$router.go(-1)
             }, 2000);
           }else if (res.data.Status<0) {
             this.delCookie("UserId")

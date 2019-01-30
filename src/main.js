@@ -10,6 +10,9 @@ Vue.use(Cube)
 import cookie from './utils/cookie.js'
 Vue.use(cookie);
 
+import Echarts from 'echarts'
+Vue.prototype.echarts = Echarts
+Vue.use(Echarts)
 import getHost from './utils/getHost.js'
 Vue.use(getHost);
 
@@ -46,7 +49,11 @@ Vue.use(gallery, {
 //   　　
 //   return Promise.reject(error)
 // });
-
+//路由跳转后，页面回到顶部
+// router.afterEach(() => {
+//   document.body.scrollTop = 0;
+//   document.documentElement.scrollTop = 0;
+// })
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

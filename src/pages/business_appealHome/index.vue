@@ -152,10 +152,7 @@ export default {
         })
       })
       .then(res=>{
-        
         if (res.data.Status===1) {
-          console.log(res);
-          
           this.data = res.data.Data
           this.$router.push({path: '/appealStyle', query: {
             id: this.data.CategoryID,
@@ -236,7 +233,8 @@ export default {
         if (res.data.Status===1) {
           this.getToast("操作成功",'warn')
           this.deleteShopMask(false)
-          this.getData()
+          this.page=1
+          this.getData(this.page)
         }else if (res.data.Status<0) {
           this.getToast("登录失效，请重新登录",'warn')
           setTimeout(() => {
@@ -334,23 +332,30 @@ export default {
 }
 .red{
   border:1px solid #F26F53;
-  color: #F26F53
+  color: #F26F53 !important
 }
 .yellow{
   border:1px solid #BB9F61;
-  color: #BB9F61;
+  color: #BB9F61 !important;
 }
 .grey{
   border:1px solid #BFBFBF;
-  color:  #BFBFBF;
+  color:  #BFBFBF !important;
 }
 .firstLine .status{
   padding: 5px 10px !important;
     border-radius: 4px !important;
     top: 13px !important;
-    color: #BB9F61 !important;
+    /* color: #BB9F61 !important; */
 }
 .twoLine{
   padding-top: 16px !important;
+}
+.twoLine span:first-child{
+  display: block;
+  text-align: left;
+}
+.contentListBottom p{
+  width: 60% !important;
 }
 </style>

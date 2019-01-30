@@ -74,7 +74,7 @@ export default [{
   path: '/SalesmanList',
   component: SalesmanList,
   meta: {
-    title: '业务员列表'
+    // title: '业务员列表'
   },
 }, {
   path: '/CompanyFollow',
@@ -112,7 +112,7 @@ export default [{
   path: '/editUser',
   component: EditUser,
   meta: {
-    title: '编辑用户'
+    // title: '编辑用户'
   },
 },
 {

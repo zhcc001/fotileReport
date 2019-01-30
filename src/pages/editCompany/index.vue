@@ -193,9 +193,10 @@
                 selectedIndex:[this.ascId]
               })
               console.log(this.ascId)
-              if (this.ascId ==0) {
+              this.ascId = this.data.TypeID
+              if (this.ascId ==1) {
                 this.ascription = '家装'
-              } else if (this.ascId == 1) {
+              } else if (this.ascId == 2) {
                 this.ascription = '门店'
               }
               this.area = this.data.PCAName
@@ -290,7 +291,8 @@
                 UserAddress: this.data.UserAddress,
                 Remark: this.data.Remark,
                 HeadImageUrl: this.image,
-                TypeID: this.ascId
+                TypeID: this.ascId,
+                HouseNumber:this.data.HouseNumber
               })
             })
             .then(res => {

@@ -19,9 +19,9 @@
           <div class="listBottom">
             <i>申请人 {{item.CreateUserName}}</i>
             <i class="reason">说明 {{item.Reason}}</i>
-            <router-link to="/">
+            <!-- <router-link to="/"> -->
               <span>查看申诉详情>></span>
-            </router-link>
+            <!-- </router-link> -->
           </div>
         </li>
       </ul>

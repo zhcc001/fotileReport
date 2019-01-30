@@ -11,27 +11,27 @@
     <div class="inputContent">
       <div class="input">
         <span>竞品销量</span>
-        <input type="text" placeholder="请输入竞品销量" v-model="SaleCount">
+        <input type="number" placeholder="请输入竞品销量" v-model="SaleCount">
         &nbsp;个
       </div>
       <div class="input">
         <span>竞品开工数</span>
-        <input type="text" placeholder="请输入竞品开工数" v-model="WorkCount">
+        <input type="number" placeholder="请输入竞品开工数" v-model="WorkCount">
         &nbsp;个
       </div>
       <div class="input">
         <span>竞品出样量</span>
-        <input type="text" placeholder="请输入竞品出样量" v-model="SampleCount">
+        <input type="number" placeholder="请输入竞品出样量" v-model="SampleCount">
         &nbsp;个
       </div>
       <div class="input">
         <span>门店数量</span>
-        <input type="text" placeholder="请输入门店数" v-model="ShopCount">
+        <input type="number" placeholder="请输入门店数" v-model="ShopCount">
         &nbsp;个
       </div>
       <div class="input">
         <span>设计师数量</span>
-        <input type="text" placeholder="请输入设计师数量" v-model="StylistCount">
+        <input type="number" placeholder="请输入设计师数量" v-model="StylistCount">
         &nbsp;个
       </div>
     </div>
@@ -42,7 +42,7 @@
     <div class="inputContent">
       <div class="input">
         <span>公司销售金额</span>
-        <input type="text" placeholder="请输入公司销售金额" v-model="CompanySaleCount">
+        <input type="number" placeholder="请输入公司销售金额" v-model="CompanySaleCount">
         &nbsp;元
       </div>
     </div>
@@ -66,12 +66,15 @@
         ShopCount: '',
         StylistCount: '',
         CompanySaleCount: '', //公司销量
+        enter:''
       }
     },
     created() {
       this.month = this.$route.query.month
       this.ID = this.$route.query.id
       this.year = this.$route.query.year || ''
+      this.enter=this.$route.query.enter
+      console.log(this.enter)
     },
     methods: {
       commit() {
@@ -114,16 +117,37 @@
           .then(res => {
             console.log(res)
             if (res.data.Status === 1) {
-              this.getToast("编辑成功，返回公司详情页", 'correct')
-              setTimeout(() => {
+              
+              if(this.enter==2){
+                this.getToast("编辑成功", 'correct')
+                setTimeout(() => {
                 this.$router.replace({
-                  path: '/companyDetail',
+                  path: '/competeProduct',
                   query: {
-                    id: this.ID
+                    id: this.ID,
+                    year:this.year,
+                    month:this.month
+
                   }
                 })
                 this.$router.go(-1)
               }, 2000);
+              }
+              if(this.enter==1){
+                this.getToast("编辑成功，返回公司详情页", 'correct')
+                setTimeout(() => {
+                this.$router.replace({
+                  path: '/companyDetail',
+                  query: {
+                    id: this.ID,
+                    // year:this.year
+
+                  }
+                })
+                this.$router.go(-1)
+              }, 2000);
+              }
+              
             } else if (res.data.Status < 0) {
               this.getToast("登录失效，请重新登录", 'warn')
               setTimeout(() => {

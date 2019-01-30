@@ -111,13 +111,15 @@ export default {
             this.hasMask =false
             this.getToast("操作成功",'warn')
             if (this.style==1) {
-                this.$router.push({
+                this.$router.replace({
                 path:'/companyList'
               })
+              this.$router.go(-1)
             }else{
-              this.$router.push({
+              this.$router.replace({
               path:'/CompanyFollow'
               })
+              this.$router.go(-1)
             }
             
           }else if (res.data.Status<0) {

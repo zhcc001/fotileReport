@@ -167,7 +167,13 @@ export default {
         if (res.data.Status===1) {
           this.getToast(res.data.Message,'warn')
           setTimeout(() => {
-            this.$router.push({path: '/home'});
+            this.$router.replace({path: '/appealHome'});
+            if(this.applyType ==1){
+              this.$router.go(-3)
+            }else{
+              this.$router.go(-2)
+
+            }
           }, 2000);
           
         }else if (res.data.Status<0) {

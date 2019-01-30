@@ -4,22 +4,56 @@
     <div class="btn">
       <button type="button" :class="{active:style==1}" @click="active(1)">授权审批</button>
       <button type="button" :class="{active:style==2}" @click="active(2)">合同审批</button>
+      <button type="button" :class="{active:style==3}" @click="active(3)" v-if="AccessId==1||AccessId==2">续签审批</button>
     </div>
+    <div class="flex selectCon">
+      <div class="flex justifyCenter select" @click="handleTimeSort">
+        <span>申请时间{{isTimeSort==0?'顺序':'逆序'}}</span>
+        <i>
+          <img src="./timeIcon.png" alt="">
+        </i>
+      </div>
+      <div class="flex justifyCenter select" @click="handleApprovalStatus">
+        <span>{{selectStatus}}</span>
+        <i>
+          <img src="./1.png" alt="" v-if="!isShowList">
+          <img src="./2.png" alt="" v-if="isShowList">
+        </i>
+      </div>
+      <div class="maskList" v-if="isShowList">
+        <ul class="flex">
+          <li :class="{yellow:selectStatus==item.Name}" v-for="item in selectList" :key='item.Status' @click="handleSelectStatus(item)">{{item.Name}}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bgcMask" v-if="isShowList"></div>
     <div class="appealList">
+        <div class="scroll-list-wrap">
+            <cube-scroll ref="scroll" :data="list" :options="options" @pulling-up="onPullingUp" @pulling-down='onPullingDown'>
       <ul>
         <li v-for="(item,index) in list" :key="index" @click="applyDetail(item.CompanyID)">
-          <span>{{item.TypeName}}</span>
-          <i>提交日期 {{item.Date}}</i>
+          <div class="oneLine">
+            <p>
+              <span class="lable">{{item.TypeName}}</span>
+              <span v-if="item.Status==0" style="color:#C19F57">待审核</span>
+              <span v-if="item.Status==1&&textFlag" style="color:#6997C0">通过</span>
+              <span v-if="item.Status==-1&&textFlag" style="color:#F26F53">不通过</span>
+              <span v-if="item.Status==1&&textFlag1" style="color:#6997C0">通过，合同剩余{{item.EndTime}}天</span>
+              <span v-if="item.Status==-1&&textFlag1" style="color:#F26F53">不通过，合同剩余{{item.EndTime}}天</span>
+            </p>
+            <i>提交日期 {{item.Date}}</i>
+          </div>
           <div class="up">
             <p class="name">{{item.CompanyName}} </p>
             <!-- <b class="salesman">业务员{{item.UserName}}</b> -->
-            <div class="upBtn">
+            <div class="upBtn" v-if="item.Status == 0">
               <button type="button" class="no" @click.stop="noAllow(true,item.ID)">不通过</button>
               <button type="button" class="yes" @click.stop="isAllow(true,item.ID)">审批通过</button>
             </div>
           </div>
           <div class="down">
-            <i @click.stop="showListMask(true,item.CompanyID)">查看相似公司</i>
+            <a href="javascript:;" style="border-bottom:1px solid #ccc;padding:3px 0;" v-if="data.TypeID" @click.stop="lookReDetali(item)">点击查看申请详情</a>
+            <i @click.stop="showListMask(true,item.CompanyID)" v-if="!data.TypeID">查看相似公司</i>
             <a href="javascript:;">
               <span>查看公司详情>></span>
             </a>
@@ -31,6 +65,20 @@
         <p>这里暂时还没有内容…</p>
       </div> -->
       <empty v-if='emptyFlag'></empty>
+      <template slot="pulldown" slot-scope="props">
+          <div v-if="props.pullDownRefresh" class="cube-pulldown-wrapper" :style="props.pullDownStyle">
+            <div v-if="props.beforePullDown" class="before-trigger" :style="{paddingTop: props.bubbleY + 'px'}">
+              <span :class="{rotate: props.bubbleY > 0}">↓</span>
+            </div>
+            <div class="after-trigger" v-else>
+              <div v-show="props.isPullingDown" class="loading">
+                <cube-loading></cube-loading>
+              </div>
+            </div>
+          </div>
+        </template>
+    </cube-scroll>
+  </div>
     </div>
     <!-- 遮罩 -->
     <div id="mask" v-if="listmask" @click="showListMask(false)">
@@ -82,18 +130,105 @@
         listFlag: true,
         isShowMask:false,
         giveUpReason:'',
-        ID:''
+        ID:'',
+        data:{},
+        isShowList:false,
+        isTimeSort:1,
+        TypeID:1,
+        selectList:[
+          {
+            Status:1,
+            Name:'已审批'
+          },
+          {
+            Status:0,
+            Name:'未审批'
+          }
+        ],
+        selectStatus:'未审批',
+        Status:0,
+        pageCount: 1,
+        page: 1,
+        pullUpLoad: false,
+        pullUpLoadThreshold: 0,
+        pullUpLoadMoreTxt: '--加载更多--',
+        pullUpLoadNoMoreTxt: '--已经到底部了--',
+        secondStop: 26,
+        textFlag:true,
+        textFlag1:false
       }
+    },
+    beforeCreate () {
+      document.querySelector('body').setAttribute('style', 'background-color:#fff')
+    },
+    beforeDestroy () {
+      document.querySelector('body').removeAttribute('style')
+    },
+    computed: {
+      options() {
+        return {
+          pullUpLoad: this.pullUpLoadObj,
+          scrollbar: true,
+          pullDownRefresh: {
+            threshold: 60,
+            stop: 44,
+            stopTime: 100,
+            txt: '更新成功'
+          },
+        }
+      },
+      pullUpLoadObj: function () {
+        return {
+          threshold: parseInt(this.pullUpLoadThreshold),
+          txt: {
+            more: this.pullUpLoadMoreTxt,
+            noMore: this.pullUpLoadNoMoreTxt
+          }
+        }
+      },
+      ...mapGetters([
+        'AccessId'
+      ])
     },
     components:{
       empty
-
     },
     created() {
       this.getList(1)
-
     },
     methods: {
+      onPullingUp() {
+        // 更新数据
+        if (this.pageCount >= this.page) {
+          this.getList(this.TypeID,this.isTimeSort,this.Status,this.page)
+        } else {
+          this.$refs.scroll.forceUpdate()
+        }
+      },
+      onPullingDown() {
+        setTimeout(() => {
+          this.page=1
+          this.getList(this.TypeID,this.isTimeSort,this.Status)
+          this.$refs.scroll.scrollTo(0, this.secondStop, 100)
+        }, 1000)
+      },
+      lookReDetali(item){
+        this.$router.push({path:'/renewalDetail',query:{reId:item.RenewID,companyId:item.CompanyID}})
+      },
+      handleSelectStatus(item) {
+        this.isShowList = false
+        this.selectStatus = item.Name
+        this.Status = item.Status
+        this.getList(this.TypeID,this.Status)
+
+      },
+      handleTimeSort(){
+        this.isTimeSort = this.isTimeSort == 0 ? 1 :0
+        this.getList(this.TypeID,this.Status)
+      },
+      handleApprovalStatus() {
+        this.isShowList = !this.isShowList
+      },
       noAllow(bool,id){
         this.isShowMask = bool
         if (bool) {
@@ -103,10 +238,10 @@
         }
       },
       showListMask(bool, id) {
+        
         this.listmask = bool
         if (bool) {
           console.log(id);
-
           this.getSimilarList(id)
         }
       },
@@ -139,20 +274,51 @@
           })
       },
       getList(TypeID) {
+        this.TypeID = TypeID
+        let url = ''
+        let params = {}
+        if (TypeID==1 || TypeID==2) {
+          this.textFlag=true
+          this.textFlag1=false
+          url = this.getHost() + '/Approval/GetFollowList'
+          params = {
+            UserId: getCookie('UserId'),
+            token: getCookie('token'),
+            TypeID: this.TypeID,
+            IsSort: this.isTimeSort,
+            Status: this.Status,
+            Page:this.page
+          }
+        } else if(TypeID==3){
+          this.textFlag=false
+          this.textFlag1=true
+          url = this.getHost() + '/Approval/RenewFollowList'
+          params = {
+            UserId: getCookie('UserId'),
+            token: getCookie('token'),
+            IsSort: this.isTimeSort,
+            Status: this.Status,
+            Page:this.page
+          }
+        }
         this.axiosloading()
         axios({
-            url: this.getHost() + '/Approval/GetFollowList',
+            url: url,
             method: 'post',
-            data: qs.stringify({
-              UserId: getCookie('UserId'),
-              token: getCookie('token'),
-              TypeID: TypeID,
-            })
+            data: qs.stringify(params)
           })
           .then(res => {
             console.log(res)
             if (res.data.Status === 1) {
+              
+              if (TypeID==3) {
+                res.data.Data['TypeID'] = 3
+                
+              }
               this.list = res.data.Data.list
+              this.data = res.data.Data
+              console.log(this.data,'data');
+              
               if (this.list == '') {
                 this.emptyFlag = true
               } else {
@@ -173,8 +339,10 @@
       },
       active(style) {
         console.log(style);
-
         this.style = style
+        this.isTimeSort = 1
+        this.selectStatus = '未审批'
+        this.Status = 0
         this.getList(style)
       },
       isAllow(bool, id) {
@@ -183,9 +351,15 @@
             this.getToast("请输入不通过得原因",'warn')
             return
           }
+          let NoAgreeUrl = ''
+          if (this.TypeID==3) {
+            NoAgreeUrl =  this.getHost() + '/Approval/CancelRenewFollow'
+          }else{
+            NoAgreeUrl = this.getHost() + '/Approval/CancelFollow'
+          }
           this.axiosloading()
            axios({
-            url: this.getHost() + '/Approval/CancelFollow',
+            url: NoAgreeUrl,
             method: 'post',
             data: qs.stringify({
               UserId: getCookie('UserId'),
@@ -213,8 +387,14 @@
             }
           })
         }else{
+          let agreeUrl = ''
+          if (this.TypeID==3) {
+            agreeUrl =  this.getHost() + '/Approval/AgreeRenewFollow'
+          }else{
+            agreeUrl = this.getHost() + '/Approval/AgreeFollow'
+          }
            axios({
-            url: this.getHost() + '/Approval/AgreeFollow',
+            url: agreeUrl,
             method: 'post',
             data: qs.stringify({
               UserId: getCookie('UserId'),
@@ -263,6 +443,63 @@
 
 <style scoped>
   @import '../../common/mask.css';
+  .flex{
+    display: flex;
+    align-items: center;
+  }
+  .justifyCenter{
+    justify-content: center;
+  }
+  .select{
+    flex: 1;
+  }
+  .select img{
+    width: 9px;
+    margin-left: 5px;
+  }
+  .selectCon{
+    background-color: #fff;
+    border-top:1px solid #F5F5F5;
+    border-bottom: 1px solid #F5F5F5; 
+    position: relative;
+    height: 45px;
+  }
+  .maskList{
+    position: absolute;
+    top: 46px;
+    left: 0;
+    width: 100%;
+    z-index: 5;
+  }
+  .maskList .yellow{
+    color: #E2C78F;
+  }
+  .maskList ul{
+    background-color: #fff;
+    flex-direction: column;
+    width: 100%;
+  }
+  .maskList ul li{
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid #F5F5F5;
+    padding-left: 15px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+  .maskList ul li:last-child{
+    border-bottom: none;
+  }
+  .bgcMask{
+    width: 100%;
+    min-height:calc(100vh - 150px);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    background-color: rgba(0,0,0,.4);
+  }
   .maskContain .close {
     display: block;
     padding: 0 24px;
@@ -295,11 +532,12 @@
   }
 
   .btn {
-    width: 58%;
+    /* width: 58%; */
     margin: 0 auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     padding: 16px 0;
+    background-color: #fff;
   }
 
   .btn button {
@@ -310,9 +548,7 @@
     line-height: 29px;
     text-align: center;
     font-size: 14px;
-
-
-
+    margin-right: 10px;
   }
 
   .btn button.active {
@@ -323,18 +559,18 @@
   }
 
   .btn button {
-    color: rgba(179, 179, 179, 1);
-    border: 1px solid #959595;
+    color: #B3B3B3;
+    border: 1px solid #B3B3B3;
     background: none;
 
   }
 
-  .appealList {
-    width: 94%;
+  
+  .appealList ul{
+    width: 92%;
     margin: 0 auto;
-    overflow: hidden;
+    margin-top: 20px;
   }
-
   .appealList ul li {
     overflow: hidden;
     background: white;
@@ -342,9 +578,15 @@
     margin-bottom: 9px;
     padding-bottom: 20px;
     border-radius: 4px;
+    box-shadow: 0 0px 15px rgba(125, 125, 125, 0.19);
+  }
+  .appealList ul li .oneLine{
+    display: flex;
+    justify-content: space-between;
+    align-items: center
   }
 
-  .appealList ul li>span {
+  .appealList ul li .oneLine .lable {
     display: inline-block;
     background: rgba(246, 234, 212, 1);
     border-radius: 0px 10px 10px 0px;
@@ -359,8 +601,11 @@
     flex-grow: 1; */
     /* margin-right: 140px; */
   }
+  .appealList ul li .oneLine span{
+    font-size: 10px;
+  }
 
-  .appealList ul li>i {
+  .appealList ul li .oneLine>i {
     font-style: normal;
     font-size: 12px;
     color: rgba(76, 76, 76, 1);
@@ -372,13 +617,12 @@
   .appealList ul li .up {
     width: 92%;
     margin: 0 auto;
-    border-bottom: 1px solid rgba(177, 177, 177, 1);
-    padding-bottom: 8px;
+    border-bottom: 1px solid #F5F5F5;
+    padding: 15px 0;
     margin-bottom: 14px;
-    margin-left: 20px;
+    margin-left: 15px;
     position: relative;
     display: flex;
-    line-height: 28px;
     justify-content: space-between;
 
   }
@@ -448,7 +692,10 @@
     width: 90%;
     overflow: hidden;
     margin-left: 20px;
-
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
   }
 
   .appealList ul li .down i {
@@ -458,7 +705,6 @@
   }
 
   .appealList ul li .down a {
-    float: right;
     font-size: 12px;
     color: rgba(128, 128, 128, 1);
   }
@@ -482,5 +728,7 @@
     padding-top: 24px;
 
   }
-
+  .appealList .scroll-list-wrap {
+    height: calc(100vh - 116px);
+  }
 </style>

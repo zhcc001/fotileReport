@@ -4,17 +4,19 @@
           <div class="contentListTop">
               <p class="firstLine">
                 <span :class="{qiaTan:item.Status==1,qianYue:item.Status==2,qianYued:item.Status==3,fangQi:item.Status==-1,xinJian:item.Status==0,guoQi:item.Status==-3}">{{item.StatusName}}</span>
-                <span v-if="item.Status!=3">剩余保护期:{{item.EndDate}}天</span>
-                <span v-if="item.Status==3">合同剩余时间:{{item.EndTime}}天</span>
+                <span v-if="item.Status==1||item.Status==2">剩余保护期:{{item.EndDate}}天</span>
+                <span v-if="item.Status==3||item.Status==-3">合同剩余时间:{{item.EndTime}}天</span>
               </p>
               <p class="twoLine">
                 <a href="javascript:;" class="round" :class="{'active':checkBoxs[index]}" @click.stop="check(index,item.ID)"><b
                     :class="{'active':checkBoxs[index]}"></b></a>
                     <!-- 公司评级 -->
-                    <!-- <a href="javascript:;"  class="bigIcon"><span class="smallIcon"><b>B+</b></span></a> -->
+                    <a href="javascript:;"  class="bigIcon" v-if='item.Rate!=null'><span class="smallIcon"><b>{{item.Rate}}</b></span></a>
                 <a href="javascript:;" class="name">{{item.Name}}</a>
+                <span @click.stop="action(item.ID,'home')" v-if="Action">+行动</span>
               </p>
               <p class="downLine"><span class="zuZhi">{{item.SalesManName}}</span><b>({{item.Organization}})</b></span><span class="address">{{item.Address}}</span></p>
+              
               <i v-if="item.IsEmphasis||IsEmphasis"></i>
             </div>
             <div class="contentListBottom">

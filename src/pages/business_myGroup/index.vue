@@ -167,9 +167,10 @@ export default {
           this.getToast("解散成功",'warn')
           this.deleteShopMask(false)
           setTimeout(() => {
-            this.$router.push({
+            this.$router.replace({
               path:'/allgroups'
             })
+            this.$router.go(-1)
           }, 2000);
         }else if (res.data.Status<0) {
           this.getToast("登录失效，请重新登录",'warn')

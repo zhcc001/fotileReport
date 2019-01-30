@@ -1,5 +1,5 @@
 <template>
-   
+
   <!-- 家装公司管理 -->
   <div class="HomeDecoration companyTop" :class="{active:Mask}">
     <!-- 上部 -->
@@ -15,9 +15,9 @@
           <span>{{count.Complete}}</span>
         </button>
         <button type="button">已过期
-          <span>{{count.Complete}}</span>
+          <span>{{count.Expired}}</span>
         </button>
-        
+
       </div>
       <div class="search">
         <input type="text" placeholder="请搜索公司名称关键词" v-model="keyword">
@@ -26,8 +26,8 @@
       <div class="FilterConditions ">
         <div class="filter" @click="maskStatus(0)" v-if='postShow'>
           <div>
-            <span class="filterResult" :class="{active:hasMask[0]}">{{salesNum!=0?salesText:statusSelect}}</span>
-            <span v-if='salesNum!=0' :class="{active:hasMask[0]}">({{salesNum}})</span>
+            <span class="filterResult" v-if='gangWei' :class="{active:hasMask[0]}">{{statusSelect}}</span>
+            <span v-if='!gangWei' :class="{active:hasMask[0]}">{{salesText}}({{salesNum}})</span>
             <img src="./2.png" class="icon" alt="" v-if='hasMask[0]'>
             <img src="./1.png" class="icon" alt="" v-else>
           </div>
@@ -55,17 +55,15 @@
               <div>
                 <div class="leftUl  widthUL grayF9">
                   <ul class="leftList" v-show='showDistrib'>
-                    <li v-if='allColor' :class='{active:textColor}'>全部{{allText}}</li>
                     <li v-for='(item,index) in leftList' @click='leftClick(item,index)' :class='{active:index==leftActive}'>{{item.Name}}</li>
-                    <li v-if='!allColor' :class='{active:leftTextColor}' v-html='rightAllText' @click='allClick&&leftAllClick()' ></li>
+                    <li  :class='{active:leftTextColor}' v-html='rightAllText' @click='allClick&&leftAllClick()'></li>
                   </ul>
                 </div>
                 <!-- 业务员列表 -->
                 <div class="scroll-list-wrap saleWarp" v-show="showDistrib">
                   <cube-scroll ref="scrollSale" :data="Status" :options="saleOptions">
                     <ul class="rightList white" v-show='showDistrib'>
-                      <li v-if='leftList.length==0' :class='{active:textColor}'>全部{{allText}}</li>
-                      <li @click='rightAllClick()' :class='{active:textColor}' v-html='leftAllText' v-else></li>
+                      <li @click='rightAllClick()' :class='{active:textColor}' v-html='leftAllText' ></li>
                       <li v-for="(item,index) in Status" :key='index' :dataZM='item.ZM' @click='clickFlag&&index!=rightActive&&item.list.length>0&&rightClick(item,index)'
                         :class='{active:index==rightActive}'>
                         <span>{{item.Name}}</span>
@@ -98,7 +96,7 @@
             <!-- 公司分类 -->
             <h3>公司分类</h3>
             <ul class="companyList">
-              <li :class='{active:allClassify}' @click='checkClassify()'>公司分类</li>
+              <li :class='{active:allClassify}' @click='checkClassify()'>全部分类</li>
               <li v-for="(item,index) in Style" :key="index" :class="{active:isStyle.indexOf(item.ID)>-1}" @click="companyCheck(item)">{{item.Name}}</li>
             </ul>
           </div>
@@ -114,7 +112,7 @@
     </div>
     <div class="listWrap">
       <div class="scroll-list-wrap">
-        <cube-scroll ref="scroll" :data="List" :options="options" @pulling-up="onPullingUp">
+        <cube-scroll ref="scroll" :data="List" :options="options" @pulling-up="onPullingUp" @pulling-down='onPullingDown'>
           <!-- 公司列表 -->
           <div class="comList">
             <focusList :list="List" id="list" v-if="!admin" :Action="active"></focusList>
@@ -124,17 +122,17 @@
                 <div class="contentListTop">
                   <p class="firstLine">
                     <span :class="{qiaTan:item.Status==1,qianYue:item.Status==2,qianYued:item.Status==3,fangQi:item.Status==-1,xinJian:item.Status==0,guoQi:item.Status==-3}">{{item.StatusName}}</span>
-                    <span v-if="item.Status!=3">剩余保护期:{{item.EndDate}}天</span>
-                    <span v-if="item.Status==3">合同剩余时间:{{item.EndTime}}天</span>
+                    <span v-if="item.Status==1||item.Status==2">剩余保护期:{{item.EndDate}}天</span>
+                    <span v-if="item.Status==3||item.Status==-3">合同剩余时间:{{item.EndTime}}天</span>
                   </p>
                   <p class="twoLine">
                     <a href="javascript:;" class="round" :class="{'active':checkBoxs[index]}" @click.stop="check(index,item.ID)"><b
                         :class="{'active':checkBoxs[index]}"></b></a>
                     <!-- 公司评级 -->
-                    <!-- <a href="javascript:;" class="bigIcon"><span class="smallIcon"><b>B+</b></span></a> -->
+                    <a href="javascript:;" class="bigIcon" v-if='item.Rate!=null'><span class="smallIcon"><b>{{item.Rate}}</b></span></a>
                     <a href="javascript:;" class="name">{{item.Name}}</a>
                   </p>
-                  <p class="downLine"><span class="zuZhi">{{item.SalesManName}}</span><b>({{item.Organization}})</b></span><span
+                  <p class="downLine"><span class="zuZhi">{{item.SalesManName?item.SalesManName:'暂无业务员'}}</span><b>({{item.Organization?item.Organization:' '}})</b></span><span
                       class="address">{{item.Address}}</span></p>
                   <i v-if="item.IsEmphasis"></i>
                 </div>
@@ -147,6 +145,18 @@
               </div>
             </div>
           </div>
+          <template slot="pulldown" slot-scope="props">
+            <div v-if="props.pullDownRefresh" class="cube-pulldown-wrapper" :style="props.pullDownStyle">
+              <div v-if="props.beforePullDown" class="before-trigger" :style="{paddingTop: props.bubbleY + 'px'}">
+                <span :class="{rotate: props.bubbleY > 0}">↓</span>
+              </div>
+              <div class="after-trigger" v-else>
+                <div v-show="props.isPullingDown" class="loading">
+                  <cube-loading></cube-loading>
+                </div>
+              </div>
+            </div>
+          </template>
         </cube-scroll>
       </div>
     </div>
@@ -173,6 +183,7 @@
     name: 'HomeDecoration',
     data() {
       return {
+        gangWei: true,
         textColor: true,
         sortArr: [], //字母排序
         postShow: true, //岗位筛选显示隐藏
@@ -187,7 +198,6 @@
         isStatus: [],
         salesArr: [],
         isFoodActive: [],
-
         salesMask: false, //业务员列表
         // 全部分类
         allStateText: [{
@@ -270,7 +280,10 @@
         allClick: true,
         quanBu: '全部',
         leftTextColor: true,
-        JobID: []
+        JobID: [],
+        secondStop: 26,
+        rightAllText:'',
+        topHight: 0,
       }
     },
     computed: {
@@ -278,6 +291,12 @@
         return {
           pullUpLoad: this.pullUpLoadObj,
           scrollbar: true,
+          pullDownRefresh: {
+            threshold: 60,
+            stop: 44,
+            stopTime: 100,
+            txt: '更新成功'
+          },
         }
       },
       saleOptions() {
@@ -288,7 +307,9 @@
           pulldown: false,
           pullup: false
         }
+
       },
+     
       pullUpLoadObj: function () {
         return {
           threshold: parseInt(this.pullUpLoadThreshold),
@@ -308,7 +329,6 @@
       companyFilter
     },
     created() {
-
       this.getStyleList()
       this.getPersonList()
       this.getList()
@@ -322,7 +342,6 @@
       }
     },
     // mounted(){
-    //   this.getPersonList()
     // },
     methods: {
       onPullingUp() {
@@ -332,6 +351,13 @@
         } else {
           this.$refs.scroll.forceUpdate()
         }
+      },
+      onPullingDown() {
+        setTimeout(() => {
+          this.page=1
+          this.getList(this.page)
+          this.$refs.scroll.scrollTo(0, this.secondStop, 100)
+        }, 1000)
       },
       distribution() {
         if (this.idList.length == 0) {
@@ -352,26 +378,21 @@
           this.checkAllBox = false
           for (let i = 0; i < this.idList.length; i++) {
             if (this.idList[i] == id) {
-              this.idList.splice(i)
+              this.idList.splice(i,1)
             }
           }
-
           for (let i = 0; i < this.checkBoxs.length; i++) {
             if (this.checkBoxs[i]) {
               this.checkAllBox = true
             }
           }
-
         } else {
           this.checkBoxs[index] = true
           this.idList.push(id)
           this.checkAllBox = true
         }
-
         this.idList = this.idList.slice()
         this.checkBoxs = this.checkBoxs.slice()
-
-
       },
       checkAll(List) {
         if (this.checkAllBox) {
@@ -382,7 +403,6 @@
           }
           this.checkBoxs = this.checkBoxs.slice()
         } else {
-
           this.checkAllBox = true
           for (let i = 0; i < List.length; i++) {
             this.checkBoxs[i] = true
@@ -391,7 +411,6 @@
           this.checkBoxs = this.checkBoxs.slice()
           this.idList = this.idList.slice()
         }
-
       },
       jump(num) {
         this.$router.push({
@@ -441,7 +460,6 @@
           .then(res => {
             if (res.data.Status === 1) {
               this.salesmanLists = res.data.Data.list
-
             } else if (res.data.Status < 0) {
               this.getToast("登录失效，请重新登录", 'warn')
               setTimeout(() => {
@@ -475,6 +493,10 @@
           .then(res => {
             if (res.data.Status === 1) {
               this.pageCount = res.data.Data.pageCount
+              this.count.Negotiation = res.data.Data.Negotiation
+              this.count.Progressive = res.data.Data.Progressive
+              this.count.Complete = res.data.Data.Complete
+              this.count.Expired = res.data.Data.Expired
               if (this.page == 1) {
                 this.List = res.data.Data.list
               } else {
@@ -490,7 +512,6 @@
               } else {
                 this.emptyFlag = false
               }
-
             } else if (res.data.Status < 0) {
               this.delCookie("UserId")
               this.delCookie("token")
@@ -513,7 +534,6 @@
           .then(res => {
             if (res.data.Status === 1) {
               this.count = res.data.Data
-
             } else if (res.data.Status < 0) {
               this.delCookie("UserId")
               this.delCookie("token")
@@ -530,25 +550,29 @@
           this.hasMask[index] = false
         } else {
           this.hasMask = [false, false, false]
-          if (this.AccessId == 2) {
-            this.allText = '区域经理'
+          if (this.Status.length > 0) {
+          } else {
+            if (this.AccessId == 2) {
+            this.rightAllText = '全部区域经理'
+            this.leftAllText = '全部区域经理'
           }
           if (this.AccessId == 1) {
-            this.allText = '部门经理'
+            this.rightAllText = '全部部门经理'
+            this.leftAllText = '全部部门经理'
           }
           if (this.AccessId == 3) {
-            this.allText = '经销商'
+            this.rightAllText = '全部经销商'
+            this.leftAllText = '全部经销商'
           }
           if (this.AccessId == 4) {
-            this.allText = '业务员'
+            this.rightAllText = '全部业务员'
+            this.leftAllText = '全部业务员'
           }
           if (this.AccessId == -1) {
-            this.allText = '分总'
+            this.rightAllText = '全部分总'
+            this.leftAllText = '全部分总'
+            
           }
-          if (this.Status.length > 0) {
-
-          }
-          if (this.Status.length > 0) {} else {
             if (index == 0) {
               axios({
                   url: this.getHost() + '/Company/UserInfoListById',
@@ -565,6 +589,9 @@
                     this.Status.forEach((t, i) => {
                       t.flag = false
                       t.positionID = 1
+                      if(t.JobID==5){
+                        this.checkBox=true
+                      }
                       this.startArr = this.Status
                       t.list.forEach((m) => {
                         m.flag = false
@@ -583,129 +610,127 @@
                         })
                       })
                     })
-
                   }
-
                 })
             }
           }
           this.hasMask[index] = true
         }
         this.Mask = this.hasMask[index] ? true : false
-
       },
-       //右边全部按钮点击
-       rightAllClick(){
-         if(this.leftAllText==this.rightAllText){
+      //右边全部按钮点击
+      rightAllClick() {
+        console.log(123)
+        if (this.leftAllText == this.rightAllText) {
           return false
         }
-        this.isFoodActive=[]
-        this.SaleID=''
-        
-        if(this.salesNum!=0&&this.leftAllText=="全部业务员"){
-          this.isFoodActive=[]
-          this.textColor=true
-          this.rightAllText=this.leftAllText
-          this.statusSelect=this.leftAllText
-          this.salesNum=0
+        this.isFoodActive = []
+        this.SaleID = ''
+
+        if (this.salesNum != 0 && this.leftAllText == "全部业务员") {
+          this.isFoodActive = []
+          this.textColor = true
+          this.rightAllText = this.leftAllText
+          // this.statusSelect=this.leftAllText
+          this.salesNum = 0
           return false
         }
-        if(this.salesNum==0&&this.leftAllText=="全部业务员"){
-          this.isFoodActive=[]
-          
-          this.textColor=true
-          this.salesNum=0
-          this.statusSelect=this.leftAllText
+        if (this.salesNum == 0 && this.leftAllText == "全部业务员") {
+          this.isFoodActive = []
+
+          this.textColor = true
+          this.salesNum = 0
+          // this.statusSelect=this.leftAllText
           return false
         }
-        this.Status.forEach((y)=>{
-          this.textColor=true
-          this.leftTextColor=true
-          this.rightActive=-1
-          this.leftList.forEach((s)=>{
-          if(this.JobID.indexOf(s.JobID)<=-1){
-            this.JobID.push(s.JobID)
-          }
-         
-        })
-        this.leftList.splice(this.JobID.indexOf(y.JobID))
-        this.rightIdArr.splice(this.rightIdArr.indexOf(y.ID))
-        this.isFoodActive=[]
-        this.salesNum=0
-        this.statusSelect=this.rightAllText
+        this.Status.forEach((y) => {
+          this.textColor = true
+          this.leftTextColor = true
+          this.rightActive = -1
+          this.leftList.forEach((s) => {
+            if (this.JobID.indexOf(s.JobID) <= -1) {
+              this.JobID.push(s.JobID)
+            }
+
+          })
+          this.leftList.splice(this.JobID.indexOf(y.JobID))
+          this.rightIdArr.splice(this.rightIdArr.indexOf(y.ID))
+          this.isFoodActive = []
+          this.salesNum = 0
+          // this.statusSelect=this.rightAllText
           if (y.JobID == 1) {
-            this.leftAllText = this.quanBu+'分总'
+            this.leftAllText = this.quanBu + '分总'
           }
           if (y.JobID == 2) {
-            this.leftAllText = this.quanBu+'部门经理'
+            this.leftAllText = this.quanBu + '部门经理'
           }
           if (y.JobID == 3) {
-            this.leftAllText = this.quanBu+'区域经理'
-            
+            this.leftAllText = this.quanBu + '区域经理'
+
           }
           if (y.JobID == 4) {
-            this.leftAllText = this.quanBu+'经销商'
+            this.leftAllText = this.quanBu + '经销商'
           }
           if (y.JobID == 5) {
-            this.leftAllText = this.quanBu+'业务员'
-            if(this.isFoodActive.indexOf(y.ID)>-1){
-              this.isFoodActive=[]
-              this.textColor=true
-              this.leftTextColor=true
-              this.allColor=false
+            this.leftAllText = this.quanBu + '业务员'
+            if (this.isFoodActive.indexOf(y.ID) > -1) {
+              this.isFoodActive = []
+              this.textColor = true
+              this.leftTextColor = true
+              this.allColor = false
             }
           }
-         this.rightAllText=this.leftAllText
+          this.rightAllText = this.leftAllText
         })
-
       },
       //左边全部按钮点击
       leftAllClick() {
-        this.textColor=true
-        this.leftTextColor=true
-        this.leftActive=-1
-        this.rightActive=-1
-        let allSale=this.leftList[this.leftList.length-1]
-        this.Status=allSale.list
-        if(this.isFoodActive.length>0){
-          this.leftAllText=this.quanBu+'业务员'
-          this.textColor=false
-        }else{
-          this.leftAllText=this.rightAllText
+        this.textColor = true
+        this.leftTextColor = true
+        this.leftActive = -1
+        this.rightActive = -1
+        let allSale = this.leftList[this.leftList.length - 1]
+        this.Status = allSale.list
+        if (this.isFoodActive.length > 0) {
+          this.leftAllText = this.quanBu + '业务员'
+          this.textColor = false
+        } else {
+          this.leftAllText = this.rightAllText
         }
-        allSale.list.forEach((i)=>{
-          if(i.list.length==0){
-            this.checkBox=true
+        allSale.list.forEach((i) => {
+          if (i.list.length == 0) {
+            this.checkBox = true
           }
         })
-
       },
       //右边列表的点击
       rightClick(item, index) {
+        this.isFoodActive = []
         if (item.JobID == 1) {
-            this.leftAllText = this.quanBu+"部门经理"
-          }
-          if (item.JobID == 2) {
-            this.leftAllText = this.quanBu+"区域经理"
-          }
-          if (item.JobID == 3) {
-            this.leftAllText = this.quanBu+"经销商"
-          }
-          if (item.JobID == 4) {
-            this.leftAllText = this.quanBu+"业务员"
-          }
-          this.rightAllText=this.leftAllText
-         
+          this.leftAllText = this.quanBu + "部门经理"
+        }
+        if (item.JobID == 2) {
+          this.leftAllText = this.quanBu + "区域经理"
+        }
+        if (item.JobID == 3) {
+          this.leftAllText = this.quanBu + "经销商"
+        }
+        if (item.JobID == 4) {
+          this.leftAllText = this.quanBu + "业务员"
+        }
+        
+        this.rightAllText = this.leftAllText
+
         this.allColor = false
         let positionID = this.positionID.indexOf(item.positionID)
         let rightID = this.rightIdArr.indexOf(item.ID)
-        
+
         if (this.leftList.length == 0) {
           this.leftList.push(item)
           this.rightIdArr.push(item.ID)
-          this.leftActive=-1
-          this.leftTextColor=true
-          this.textColor=true
+          this.leftActive = -1
+          this.leftTextColor = true
+          this.textColor = true
           this.positionID.push(item.positionID)
         }
         if (this.leftList.length == 1) {
@@ -714,49 +739,43 @@
               if (this.rightIdArr.indexOf(item.ID) < 0) {
                 this.rightIdArr.push(item.ID)
                 this.leftList.push(item)
-                this.leftActive=-1
-                this.leftTextColor=true
-                this.textColor=true
+                this.leftActive = -1
+                this.leftTextColor = true
+                this.textColor = true
               }
               if (this.positionID.indexOf(item.positionID) < 0) {
                 this.positionID.push(item.positionID)
               }
             }
-
             if (item.positionID == g.positionID) {
-
               this.rightIdArr = []
               this.leftList = []
               if (this.rightIdArr.indexOf(item.ID) < 0) {
-
                 this.rightIdArr.push(item.ID)
                 this.leftList.push(item)
-                this.leftActive=-1
-                this.leftTextColor=true
-                this.textColor=true
+                this.leftActive = -1
+                this.leftTextColor = true
+                this.textColor = true
               }
             }
-
           })
-
         }
         if (this.leftList.length > 1) {
           this.leftList.forEach((g) => {
             if (this.rightIdArr.indexOf(item.ID) < 0) {
               this.rightIdArr.push(item.ID)
               this.leftList.push(item)
-              this.leftActive=-1
-              this.leftTextColor=true
-              this.textColor=true
+              this.leftActive = -1
+              this.leftTextColor = true
+              this.textColor = true
               if (this.positionID.indexOf(item.positionID) < 0) {
                 this.positionID.push(item.positionID)
               }
-            }else{
-            }
+            } else {}
             if (item.positionID == g.positionID && item.ID != g.ID) {
-              this.leftActive=-1
-              this.leftTextColor=true
-              this.textColor=true
+              this.leftActive = -1
+              this.leftTextColor = true
+              this.textColor = true
               this.leftList.splice(positionID, this.leftList.length - 1 - positionID)
               this.positionID.splice(positionID + 1, this.positionID.length - 1 - positionID)
               this.rightIdArr.splice(rightID + 1, this.rightIdArr.length - 1 - rightID)
@@ -764,14 +783,13 @@
           })
         }
         this.rightActive = -1
-
         item.list.forEach((k, l) => {
           if (k.list.length <= 0) {
             this.clickFlag = false
             this.checkBox = true
             this.leftActive = -1
             this.textColor = true
-            this.leftTextColor=true
+            this.leftTextColor = true
           } else {
             this.checkBox = false
             this.clickFlag = true
@@ -783,27 +801,26 @@
       //左边列表的点击
       leftClick(item, index) {
         if (item.JobID == 1) {
-            this.leftAllText = this.quanBu+"分总"
-          }
-          if (item.JobID == 2) {
-            this.leftAllText = this.quanBu+"部门经理"
-          }
-          if (item.JobID == 3) {
-            this.leftAllText = this.quanBu+"区域经理"
-          }
-          if (item.JobID == 4) {
-            this.leftAllText = this.quanBu+"经销商"
-          }
-         
+          this.leftAllText = this.quanBu + "分总"
+        }
+        if (item.JobID == 2) {
+          this.leftAllText = this.quanBu + "部门经理"
+        }
+        if (item.JobID == 3) {
+          this.leftAllText = this.quanBu + "区域经理"
+        }
+        if (item.JobID == 4) {
+          this.leftAllText = this.quanBu + "经销商"
+        }
+
         this.leftActive = index
         if (this.leftActive >= 0) {
           this.textColor = false
-          this.leftTextColor=false
+          this.leftTextColor = false
         }
         if (item.list.length >= 0) {
           this.checkBox = false
           this.clickFlag = true
-
         } else {
           this.checkBox = true
           this.clickFlag = false
@@ -822,7 +839,6 @@
             }
           })
         })
-
         if (idArr.indexOf(item.ID) < 0) {
           this.Status = this.startArr
           this.Status.forEach((t, i) => {
@@ -842,26 +858,23 @@
           this.isFoodActive.push(id);
           this.salesNum = this.isFoodActive.length
           this.SaleID = this.isFoodActive.join(',')
-          this.rightAllText="业务员"+"("+this.salesNum+")"
-
+          this.rightAllText = "业务员" + "(" + this.salesNum + ")"
         } else {
           this.isFoodActive.splice(indexId, 1);
           this.salesNum = this.isFoodActive.length
-          this.rightAllText="业务员"+"("+this.salesNum+")"
+          this.rightAllText = "业务员" + "(" + this.salesNum + ")"
           if (this.salesNum == 0) {
-            this.rightAllText = this.quanBu+"业务员"
-            this.leftAllText = this.quanBu+"业务员"
-            this.statusSelect = this.rightAllText
-            this.textColor=true
+            this.rightAllText = this.quanBu + "业务员"
+            this.leftAllText = this.quanBu + "业务员"
+            this.textColor = true
           }
           this.SaleID = this.isFoodActive.join(',')
         }
         if (this.isFoodActive.indexOf(item.ID) > -1) {
           this.textColor = false
-          this.leftTextColor=true
+          this.leftTextColor = true
         }
       },
-
       // 业务员列表重置
       resetSales() {
         this.isFoodActive = []
@@ -871,18 +884,21 @@
       sureSales() {
         if (this.salesNum > 0) {
           this.SaleID = this.isFoodActive.join(',')
-        }else{
-          this.statusSelect=this.leftAllText
+          this.statusSelect = this.rightAllText
+        } else {
+          this.statusSelect = this.leftAllText
         }
-        if(this.leftList.length==0&&this.textColor==true){
-          this.statusSelect=this.quanBu+this.allText
+        // this.statusSelect = this.quanBu + this.allText
+        if(this.leftList.length == 0){
+          this.DealerID=''
         }else{
           this.DealerID = this.leftList[this.leftList.length - 1].ID
+
         }
         this.page = 1
         this.getList()
         this.hasMask = [false, false, false]
-        this.$refs.scroll.scrollTo(0,0)
+        this.$refs.scroll.scrollTo(0, 0)
       },
       //点击全部分类
       checkAllStatus() {
@@ -897,10 +913,14 @@
         if (indexId < 0) {
           this.isStatus.push(id);
           this.StatusID = this.isStatus.join(',')
-        } else {
-          this.isStatus.splice(indexId, 1);
+        } else{
+          if(this.isStatus.length>1){
+            this.isStatus.splice(indexId,1)
           this.StatusID = this.isStatus.join(',')
+          }
+          
         }
+        
       },
       //点击公司分类
       checkClassify() {
@@ -915,9 +935,11 @@
         if (indexId < 0) {
           this.isStyle.push(id);
           this.TypeID = this.isStyle.join(',')
-        } else {
-          this.isStyle.splice(indexId, 1);
-          this.TypeID = this.isStyle.join(',')
+        } else{
+          if(this.isStyle.length>1){
+            this.isStyle.splice(indexId,1)
+            this.TypeID = this.isStyle.join(',')
+          }
         }
       },
       //高级筛选点击重置
@@ -935,7 +957,7 @@
         this.page = 1
         this.getList()
         this.hasMask = [false, false, false]
-        this.$refs.scroll.scrollTo(0,0)
+        this.$refs.scroll.scrollTo(0, 0)
       },
       // 首字母定位
       namePosition(item, index) {
@@ -953,6 +975,7 @@
         var liHeight = 40 //li的高度
         this.$refs.scrollSale.scrollTo(0, this.scrollToY = -((number) * liHeight), )
       },
+     
     },
   }
 
@@ -967,7 +990,6 @@
     background-color: #F5F5F5;
     overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch;
-
   }
 
   .saleWarp .cube-scroll-content {
@@ -1059,7 +1081,6 @@
   .top .topBtn button:nth-child(2) {
     background: #FFDED6;
     color: #F26F53;
-
   }
 
   .top .topBtn button:nth-child(3) {
@@ -1077,7 +1098,6 @@
     height: 44px;
     margin: 0 auto;
     position: relative;
-
   }
 
   .top .search input {
@@ -1088,7 +1108,6 @@
     padding-left: 14px;
     border: 1px solid rgba(208, 208, 208, 1);
     border-radius: 4px;
-
   }
 
   .top .search span {
@@ -1138,7 +1157,6 @@
     font-size: 12px;
     line-height: 22px;
     padding-left: 6px;
-
   }
 
   .top .classList ul li span {

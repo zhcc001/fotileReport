@@ -16,6 +16,8 @@ const MyGroup = () => import('@/pages/business_myGroup')
 const CompanyFollow = () =>import ('@/pages/admin_CompanyFollow')
 const CompanyContract = () =>import ('@/pages/busniess_companyContract')
 const GiveUpCompany = () =>import ('@/pages/busniess_giveUpCompany')
+const applyRenewal = () => import('@/pages/applyRenewal_business')
+
 
 
 
@@ -35,13 +37,14 @@ export default [ {
   path: '/appealHome',
   component: AppealHome,
   meta: {
-    title: '我要申诉'
+    title: '我要申诉',
+    // keepAlive:true
   }
 }, {
   path: '/appealStyle',
   component: AppealStyle,
   meta: {
-    title: '申诉类型'
+    // title: '申诉类型'
   }
 }, {
   path: '/appealFollowUp',
@@ -126,4 +129,11 @@ export default [ {
       title: '放弃跟进'
     },
   },
+  {
+    path: '/applyRenewal',
+    component: applyRenewal,
+    meta: {
+      title: '申请续签'
+    },
+  }
 ]

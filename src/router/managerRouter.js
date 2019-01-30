@@ -15,7 +15,6 @@ const UploadContract = () =>
   import ('@/pages/business_uploadContract')
 const ApplyAuthorized = () =>
   import ('@/pages/business_applyAuthorized')
-
 export default [
 {
   path: '/approvalCompany',
@@ -24,13 +23,6 @@ export default [
       title: '新建公司待审批'
   },
 },
-// {
-//   path: '/companyContract',
-//   component: CompanyContract,
-//   meta: {
-//       title: '新建公司已签约'
-//   },
-// },
 {
   path: '/giveUpCompany',
   component: GiveUpCompany,
@@ -41,7 +33,8 @@ export default [
   path: '/appealManger',
   component: AppealManger,
   meta: {
-    title: '跟进审批'
+    title: '跟进审批',
+    keepAlive:true
   },
 }, {
   path: '/UserList',
@@ -54,14 +47,8 @@ export default [
   path: '/appeal',
   component: Appeal,
   meta: {
-    title: '申诉审批'
-  },
-},
-{
-  path: '/appeal',
-  component: Appeal,
-  meta: {
-    title: '申诉审批'
+    title: '申诉审批',
+    keepAlive:true
   },
 },
 {

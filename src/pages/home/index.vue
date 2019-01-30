@@ -1,5 +1,5 @@
 <template>
-  <div id="home">
+  <div id="home" :class='{app:appClass}'>
     <!-- 首页 -->
     <!-- 头部信息 -->
     <div class="home_top">
@@ -15,13 +15,13 @@
     <!-- 消息中心 -->
     <div class="home_message">
       <div class="msg_top">
-        <div class="msgList">
-          <router-link to="/companyRetrieval">
+        <div class="msgList" @click='showSearch()'>
+          <a href="javascript:void(0)">
             <div class="msgbg0">
               <img src="./index111.png" alt="">
             </div>
             <p>公司检索</p>
-          </router-link>
+          </a>
         </div>
         <div class="msgList" v-for="(item,index) in msgList" :key="index">
           <router-link :to="item.Src">
@@ -39,6 +39,27 @@
         <router-link to="/addCompany" class="addCompany" v-if="action">新建公司</router-link>
         <router-link to="/appealHome" href="javascript:;" class="appeal" v-if="action">我要申诉</router-link>
       </div>
+
+    </div>
+    <div class="dataBox">
+      <h5 class="dataTitle">数据报表统计</h5>
+      <div class="dataModel">
+        <div class="business" @click='yeWu()'>
+          <div class="text">
+            <h6>业务统计</h6>
+            <p class="clickDetail">点击查看业务统计详情</p>
+          </div>
+          <img class="sanJiao" src="./sanJiao.png" alt="">
+
+        </div>
+        <div class="sale" @click='xiaoShou()'>
+          <div class="text">
+            <h6>销售统计</h6>
+            <p class="clickDetail">点击查看销售统计详情</p>
+          </div>
+          <img class="sanJiao" src="./sanJiao.png" alt="">
+        </div>
+      </div>
     </div>
     <!-- 最新公告 -->
     <div class="home_newAnnounce">
@@ -55,7 +76,7 @@
     <!-- 重点关注 -->
     <div class="home_content" v-if="buniess">
       <div class="focus" v-if="List.length">
-        重点关注({{List.length}})
+        重点关注
       </div>
       <div>
         <focusList :list="List" :Action="action" :IsEmphasis=true></focusList>
@@ -71,14 +92,69 @@
     <div id="mask" v-if="hasPsdMask">
       <div class="maskContain">
         <router-link to="/modifyPsd" class="modifyPsd">修改密码</router-link>
+        <a href="javascript:;" class="loginOut msg" @click="msgSetting">消息推送设置</a>
         <a href="javascript:;" class="loginOut" @click="logout">退出登录</a>
         <a href="javascript:;" class="cancel" @click="PsdMask(false)">取消</a>
+      </div>
+    </div>
+    <!-- 公司检索弹层 -->
+    <div class="searchMask" v-if='searchFlag'>
+      <div class="stateContent">
+        <div class="guanBiImg" @click='hideSearch()'>
+          <img class="guanBi" src="./guanBi.png" alt="">
+        </div>
+        <div class="stateUl">
+          <h3>公司检索</h3>
+          <div class="search">
+            <input type="text" placeholder="请输入关键词搜索" v-model="keyword">
+
+            <img src="./del.png" alt="" @click='delValue()'>
+          </div>
+          <span class="tips">搜索范围：公司全称、公司简称、联系人、公司地址、业务员</span>
+          <!-- 公司归属 -->
+          <h3>公司归属</h3>
+          <ul class="guiShuType">
+            <li :class='{active:guiShuClass}' @click='allGuiShu()'>不限</li>
+            <li v-for='(item,index) in guiShuType' :key='index' :class="{active:index==isGuiShu}" @click="guiShuCheck(item,index)">{{item.Name}}</li>
+          </ul>
+          <!-- 公司分类 -->
+          <h3>公司类型</h3>
+          <ul class="companyList">
+            <li :class='{active:allClassify}' @click='checkClassify()'>全部</li>
+            <li v-for="(item,index) in Style" :key="index" :class="{active:isStyle.indexOf(item.ID)>-1}" @click="companyCheck(item)">{{item.Name}}</li>
+          </ul>
+          <!-- 全部状态 -->
+          <h3>状态筛选</h3>
+          <ul class="allState">
+            <li :class='{active:allStatus}' @click='checkAllStatus()'>全部</li>
+            <li v-for="(item,index) in allStateText" :key="index" :class="{active:isStatus.indexOf(item.ID)>-1}" @click="stateCheck(item)">{{item.Name}}</li>
+          </ul>
+
+        </div>
+        <div class="btnSearch">
+          <button type="button" class="sureSearch" @click='sureSearch()'>我要搜索</button>
+        </div>
+      </div>
+    </div>
+    <!-- 消息绑定 -->
+    <div class="msgMask" v-if='bindFlag'>
+      <div class="msgContent">
+        <div class="box">
+          <h5>消息推送绑定</h5>
+          <p>你好，请确认系统消息推送是否与当前登录微信号绑定？</p>
+          <i>否则，您将接收不到相关微信消息推送。</i>
+          <div class="msgBtn">
+            <button type="button" class="noBind" @click='noBindClick()'>暂不绑定</button>
+            <button type="button" class="binding" @click='msgSetting()'>立即绑定</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  import eventVue from '../../js/eventVue.js'
   import {
     mapGetters,
     mapMutations
@@ -92,6 +168,8 @@
     name: 'Home',
     data() {
       return {
+        appClass: false,
+        bindFlag: false,
         //最新申诉显示
         appeal: false,
         //行动
@@ -118,7 +196,49 @@
         applyList: [],
         addUser: false,
         annou: false,
-        emptyInfo: false
+        emptyInfo: false,
+        weXinMsg: '',
+        allStatus: true, //全部公司状态
+        // 全部分类
+        allStateText: [{
+          ID: 1,
+          Name: '洽谈中',
+          check: false,
+        }, {
+          ID: 2,
+          Name: '签约中',
+          check: false,
+        }, {
+          ID: 3,
+          Name: '已签约',
+          check: false,
+        }, {
+          ID: -3,
+          Name: '已过期',
+          check: false,
+        }],
+        //公司归属
+        guiShuType: [{
+          ID: 1,
+          Name: '家装',
+          check: false,
+        }, {
+          ID: 2,
+          Name: '门店',
+          check: false,
+        }],
+        allClassify: true, //全部公司分类
+        guiShuClass: true,
+        isStyle: [],
+        isStatus: [],
+        // 公司类型列表
+        Style: [],
+        isGuiShu: -1,
+        searchFlag: false,
+        statusId: '', //公司状态
+        typeId: '', //公司归属
+        categoryId: '', //公司类型
+        keyword: '', //关键字
       }
     },
     components: {
@@ -126,6 +246,12 @@
       appealList
     },
     created() {
+      this.move()
+      console.log(sessionStorage.getItem('msgId'), 'msgId')
+
+      this.authorized()
+
+      this.getStyleList()
       //业务员隐藏最新申诉
       if (this.AccessId == 5) {
         this.appeal = false
@@ -156,7 +282,6 @@
       this.getOneAnnounce()
 
 
-
     },
     computed: {
       ...mapGetters([
@@ -164,8 +289,21 @@
       ])
     },
     methods: {
+       /***滑动限制***/
+       stop(){
+        var mo=function(e){e.preventDefault();};
+        document.body.style.overflow='hidden';
+        document.addEventListener("touchmove",mo,false);//禁止页面滑动
+      },
+      /***取消滑动限制***/
+      move(){
+        var mo=function(e){e.preventDefault();};
+        document.body.style.overflow='';//出现滚动条
+        document.removeEventListener("touchmove",mo,false);
+      },
       PsdMask(bool) {
         this.hasPsdMask = bool
+
       },
       logout() {
         this.setAccessId('')
@@ -287,10 +425,171 @@
             }
           })
       },
+      // 判断是否授权
+      authorized() {
+        axios({
+          url: this.getHost() + '/Home/GetUserOpenId',
+          method: 'post',
+          data: qs.stringify({
+            UserId: getCookie('UserId'),
+            token: getCookie('token')
+          })
+        }).then(res => {
+          console.log(res)
+          if (res.data.Status == 403) {
+            if (sessionStorage.getItem('msgId')) {
+              this.bindFlag = true
+            }
+
+          }
+          this.weXinMsg = res.data.Message
+
+        })
+      },
+      // 消息设置
+      msgSetting() {
+        sessionStorage.removeItem('msgId')
+        // this.$router.push({
+        //   path: "/msgSetting"
+        // })
+        console.log(this.weXinMsg)
+        window.location.href = this.weXinMsg
+
+      },
+      noBindClick() {
+        this.bindFlag = false
+        sessionStorage.removeItem('msgId')
+      },
+      // 获取公司类型
+      getStyleList() {
+        this.axiosloading()
+        axios({
+            url: this.getHost() + '/Notice/CompanyList',
+            method: 'post',
+            data: qs.stringify({
+              UserId: getCookie('UserId'),
+              token: getCookie('token')
+            })
+          })
+          .then(res => {
+            if (res.data.Status === 1) {
+              this.Style = res.data.Data.list
+            } else if (res.data.Status < 0) {
+              this.getToast("登录失效，请重新登录", 'warn')
+              setTimeout(() => {
+                this.delCookie("UserId")
+                this.delCookie("token")
+                this.setAccessId('')
+                location.replace('/')
+              }, 2000);
+            } else {
+              this.getToast(res.data.Message, 'warn')
+            }
+          })
+      },
+      // 显示搜素弹层
+      showSearch() {
+        this.searchFlag = true
+        this.appClass = true
+        this.stop()
+      },
+      // 关闭搜索弹层
+      hideSearch() {
+        this.searchFlag = false
+        this.appClass = false
+        this.move()
+      },
+      //点击全部分类
+      checkAllStatus() {
+        this.allStatus = true
+        this.isStatus = []
+        this.statusId = ''
+      },
+      stateCheck(item) {
+        this.allStatus = false
+        let id = item.ID
+        let indexId = this.isStatus.indexOf(id);
+        if (indexId < 0) {
+          this.isStatus.push(id);
+          this.statusId = this.isStatus.join(',')
+        } else {
+          if (this.isStatus.length > 1) {
+            this.isStatus.splice(indexId, 1)
+            this.statusId = this.isStatus.join(',')
+          }
+
+        }
+        console.log()
+      },
+      // 点击归属
+      allGuiShu() {
+        this.guiShuClass = true
+        this.isGuiShu = -1
+      },
+      guiShuCheck(item, index) {
+        this.isGuiShu = index
+        this.guiShuClass = false
+        this.typeId = item.ID
+
+      },
+      //点击公司分类
+      checkClassify() {
+        this.allClassify = true
+        this.isStyle = []
+        this.categoryId = ''
+      },
+      companyCheck(item) {
+        this.allClassify = false
+        let id = item.ID
+        let indexId = this.isStyle.indexOf(id);
+        if (indexId < 0) {
+          this.isStyle.push(id);
+          this.categoryId = this.isStyle.join(',')
+        } else {
+          if (this.isStyle.length > 1) {
+            this.isStyle.splice(indexId, 1)
+            this.categoryId = this.isStyle.join(',')
+          }
+        }
+      },
+      // 确定搜索
+      sureSearch() {
+        if (this.keyword == '') {
+          this.getToast("请输入关键字", 'warn')
+        } else {
+          this.$router.push({
+            path: '/companyRetrieval',
+            query: {
+              typeId: this.typeId,
+              statusId: this.statusId,
+              categoryId: this.categoryId,
+              keyword: this.keyword
+            }
+          })
+        }
+
+      },
+      delValue(){
+        this.keyword=''
+      },
+      //跳转业务统计
+      yeWu() {
+        this.$router.push({
+          path: '/businessStatistics',
+
+        })
+      },
+      //跳转销售统计
+      xiaoShou() {
+        this.$router.push({
+          path: '/saleStatistics',
+
+        })
+      },
       ...mapMutations({
         setAccessId: 'SET_ACCESSID'
       })
-    }
+    },
   }
 
 </script>
@@ -298,6 +597,12 @@
 <style scoped>
   @import '../../common/focusList.css';
   @import '../../common/mask.css';
+
+  .app {
+    height: 100vh;
+    overflow: hidden;
+  }
+
   #home {
     width: 100%;
     box-sizing: border-box;
@@ -356,6 +661,7 @@
     background-color: #fff;
     padding: 0 20px;
     margin-bottom: 10px;
+    padding-bottom: 10px;
   }
 
   .msg_top {
@@ -381,7 +687,7 @@
     color: #000;
   }
 
-  .msgbg0 img{
+  .msgbg0 img {
     display: block;
     width: 64px;
     height: 64px;
@@ -455,12 +761,17 @@
     text-align: center;
   }
 
+  .msg {
+    background-color: white !important;
+    border: 1px solid #989898;
+  }
+
   .msg_bottom {
     width: 100%;
     /* height: 80px; */
     display: flex;
     align-items: center;
-    padding: 5px;
+    padding: 5px 0;
   }
 
   .msg_bottom a {
@@ -552,6 +863,315 @@
     font-size: 28px;
     font-weight: 600;
     text-align: center;
+  }
+
+  .msgMask {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+  }
+
+  .msgContent {
+    width: 78%;
+    margin: 0 auto;
+    background: white;
+    margin-top: 20vh;
+    border-radius: 4px;
+  }
+
+  .box {
+    width: 80%;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 15px;
+  }
+
+  .msgContent h5 {
+    font-size: 18px;
+    color: #404040;
+    text-align: center;
+    font-weight: 550;
+    margin-bottom: 22px;
+  }
+
+  .msgContent p {
+    font-size: 16px;
+    color: #5E5E5E;
+    line-height: 20px;
+    margin-bottom: 20px;
+  }
+
+  .msgContent i {
+    font-size: 10px;
+    color: #989898;
+  }
+
+  .msgContent button {
+    border: none;
+    background: none;
+    display: block;
+    padding: 0 24px;
+    font-size: 13px;
+    line-height: 34px;
+    border-radius: 2px;
+  }
+
+  .msgBtn {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 30px;
+  }
+
+  .msgBtn .noBind {
+    color: #989898;
+    background: #EDECEB;
+  }
+
+  .msgBtn .binding {
+    color: white;
+    background: #D7B878;
+  }
+
+  /* 公司检索 */
+  .searchMask {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+  }
+
+  .stateContent {
+    width: 100%;
+    height: 86%;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 300;
+    -webkit-overflow-scrolling: touch;
+    bottom: 0;
+    background: white;
+  }
+
+  .stateUl {
+    margin: 0 auto;
+    padding: 22px 6px 0 6px;
+    padding-bottom: 10px;
+    max-height: 78%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stateUl ul {
+    width: 95%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+
+  }
+
+  .stateContent h3 {
+    font-size: 16px;
+    color: #171717;
+    font-weight: 550;
+    padding-left: 10px;
+  }
+
+  .stateContent li {
+    padding: 0 16px;
+    line-height: 24px;
+    border-radius: 13px;
+    border: 1px solid #CCCCCC;
+    font-size: 12px;
+    color: #808080;
+    margin-bottom: 8px;
+  }
+
+  .stateContent li.active {
+    border: 1px solid transparent;
+    background: #E7C58B;
+    color: white !important;
+  }
+
+  .companyList li:last-child {
+    margin-right: 44%
+  }
+
+  .allState {
+    margin-bottom: 20px;
+  }
+
+  .stateUl .guiShuType {
+    justify-content: start;
+    margin-bottom: 20px;
+  }
+
+  .stateUl .guiShuType li {
+    margin-right: 14px;
+    margin-bottom: 0;
+  }
+
+  .search {
+    width: 100%;
+    height: 40px;
+    margin: 0 auto;
+    border-radius: 20px;
+    background: #F7F7F7;
+    margin-top: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .search input {
+    width: 78%;
+    display: block;
+    border: none;
+    background: none;
+    padding-left: 16px;
+    color: black;
+    font-size: 14px;
+  }
+
+  .search img {
+    display: block;
+    width: 16px;
+    height: 16px;
+    float: right;
+    margin-right: 12px;
+    margin-top: 12px;
+  }
+
+  .search input::placeholder {
+    color: #B0B0B0;
+    font-size: 12px;
+  }
+
+  .tips {
+    display: block;
+    font-size: 10px;
+    color: #9B9B9B;
+    padding-left: 15px;
+    margin-bottom: 30px;
+  }
+
+  .guanBiImg {
+    width: 34px;
+    height: 34px;
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    z-index: 500;
+  }
+
+  .guanBi {
+    display: block;
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+  }
+
+  .btnSearch {
+    width: 100%;
+    box-shadow: 2px -6px 5px 1px rgba(199, 199, 199, 0.12);
+    padding: 18px 0;
+
+  }
+
+  .sureSearch {
+    display: block;
+    width: 80%;
+    height: 40px;
+    margin: 0 auto;
+    color: white;
+    text-align: center;
+    line-height: 40px;
+    background: #E2C78F;
+    border-radius: 4px;
+  }
+
+  .dataBox {
+    padding: 30px 0;
+    margin-bottom: 10px;
+    background: white;
+  }
+
+  .dataTitle {
+    font-size: 20px;
+    color: #404040;
+    padding-left: 10px;
+    border-left: 2px solid #D5AE61;
+    font-weight: 550;
+    width: 88%;
+    margin: 0 auto;
+    margin-bottom: 24px;
+  }
+
+  .dataModel {
+    width: 88%;
+    margin: 0 auto;
+  }
+
+  .business {
+    width: 100%;
+    height: 90px;
+    background: url(/static/dataBg1.png) no-repeat center/contain;
+    /* background-size: 100% 100%;
+    background-position: center; */
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  h6 {
+    font-size: 18px;
+    color: #4C4C4C;
+    font-weight: 550;
+    margin-bottom: 8px;
+  }
+
+  .clickDetail {
+    font-size: 12px;
+    color: #B1B1B1;
+  }
+
+  .sale {
+    width: 100%;
+    height: 90px;
+    background: url(/static/dataBg2.png) no-repeat center/contain;
+    /* background-size: 100% 100%;
+    background-position: center; */
+    position: relative;
+  }
+
+  .text {
+    position: absolute;
+    right: 0;
+    width: 56%;
+    top: 26px;
+  }
+
+  .sanJiao {
+    position: absolute;
+    width: 9px;
+    height: 16px;
+    right: 16px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
   }
 
 </style>

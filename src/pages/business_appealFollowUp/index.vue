@@ -52,6 +52,7 @@ export default {
         path: '/appealMaterial',
         query:{applyType:1}
       })
+      
     },
   }
 }

@@ -5,19 +5,19 @@
     <p class="login_name">家装报备工具</p>
     <div class="big">
 
-    <div class="login_content">
-      <div class="input">
-        <span></span>
-        <input type="text" placeholder="请输入您的账户" v-model="name">
+      <div class="login_content">
+        <div class="input">
+          <span></span>
+          <input type="text" placeholder="请输入您的账户" v-model="name">
+        </div>
+        <div class="input">
+          <span></span>
+          <input type="password" placeholder="请输入您的密码" v-model="psd">
+        </div>
+        <a href="javascript:;" id="button" @click="login()">欢迎登录</a>
       </div>
-      <div class="input">
-        <span></span>
-        <input type="password" placeholder="请输入您的密码" v-model="psd">
-      </div>
-      <a href="javascript:;" id="button" @click="login()">欢迎登录</a>
     </div>
-  </div>
-    
+
 
 
   </div>
@@ -53,7 +53,7 @@
             method: 'post',
             data: qs.stringify({
               LoginName: this.name,
-              Password: this.psd
+              Password: this.psd,
             })
           })
           .then(res => {
@@ -68,14 +68,15 @@
               this.addCookie('UserId', id, 1)
               this.addCookie('Name', Name, 1)
               this.addCookie('Organization', Organization, 1)
-              if (this.AccessId == -1) {
+              if (res.data.Data.JobID == -1) {
                 this.$router.push({
-                  path: '/adminIndex'
+                  path: '/adminIndex',
                 })
               } else {
                 this.$router.push({
-                  path: '/home'
+                  path: '/home',
                 })
+                sessionStorage.setItem('msgId',1)
               }
             } else if (res.data.Status == 0) {
               const toast = this.$createToast({
@@ -87,7 +88,7 @@
               })
               toast.show()
               return
-            }else if (res.data.Status == 403) {
+            } else if (res.data.Status == 403) {
               window.location.href = res.data.Message
             }
           })
@@ -114,7 +115,7 @@
   }
 
   /* 登录名称 */
-  #login img{
+  #login img {
     position: absolute;
     display: block;
     width: 100%;
@@ -123,6 +124,7 @@
     left: 0;
 
   }
+
   .login_name {
     position: absolute;
     width: 100%;
@@ -131,15 +133,16 @@
     align-items: center;
     font-size: 30px;
     color: #e0c799;
-    top:72px;
+    top: 72px;
   }
 
   /* 登录内容 */
-  .big{
+  .big {
     height: 100%;
     display: flex;
 
   }
+
   .login_content {
     width: 88%;
     height: 396px;

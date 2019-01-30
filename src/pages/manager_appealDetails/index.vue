@@ -33,7 +33,7 @@
       <textarea v-model="data.SateReason"></textarea>
 
     </div>
-    <div class="voucher">
+    <div class="voucher" v-if='data.SateImage!=""'>
       <h5>相关凭证</h5>
       <ul>
         <li>
@@ -99,11 +99,11 @@
       <p>该申诉还未审核</p>
     </div>
 
-    <div id="mask" v-show="isImgMask" @click="hideImgMask">
+    <!-- <div id="mask" v-show="isImgMask" @click="hideImgMask">
       <div class="img" v-if="isShowImg">
         <img :src="getImgHost()+src" alt="">
       </div>
-    </div>
+    </div> -->
 
   </div>
 </template>
@@ -138,7 +138,8 @@ export default {
         isImgMask:false,
         isShowImg:false,
         StatusNum:0,
-        imgSrc:''
+        imgSrc:'',
+        imgs: [],
       }
     },
     created(){
@@ -153,11 +154,17 @@ export default {
       this.isImgMask = false
       },
       getImg(src){
-        this.src = src
-        console.log(src);
-        console.log(this.src);
-        this.isImgMask = true
-        this.isShowImg = true
+        this.src = [this.getImgHost() + src]
+        console.log(this.src)
+        this.$createImagePreview({
+          imgs: this.src,
+          zIndex:10000,
+          preventDefault:false
+        }).show()
+        // console.log(src);
+        // console.log(this.src);
+        // this.isImgMask = true
+        // this.isShowImg = true
       },
       getInfo(){
         axios({
@@ -173,7 +180,10 @@ export default {
         console.log(res)
         if (res.data.Status===1) {
           this.data = res.data.Data
-          this.imgSrc = this.getImgHost()+this.data.SateImage
+          if(this.data.SateImage!=''){
+            this.imgSrc = this.getImgHost()+this.data.SateImage
+
+          }
         }else if (res.data.Status<0) {
           this.getToast("登录失效，请重新登录",'warn')
           setTimeout(() => {

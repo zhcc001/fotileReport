@@ -3,8 +3,7 @@
   <div id="competeProductAnalysis">
     <div class="date">
       <p class="years">
-        <span :class="{active:years==2018}" @click="handleYear(2018)">2018年</span>
-        <span :class="{active:years==2019}" @click="handleYear(2019)">2019年</span>
+        <span v-for='(item,index) in yearList'  :class="{active:item==year}" @click="handleYear(item,index)" :key='index'>{{item}}年</span>
       </p>
       <div class="months" ref="wrapper">
         <ul>
@@ -47,73 +46,109 @@
 </template>
 
 <script>
-import qs from 'qs'
-import axios from "axios";
-import {mapGetters, mapMutations } from 'vuex';
-// import Bscroll from 'better-scroll'
-
-export default {
-  name: 'competeProductAnalysis',
-  data(){
-    const date = new Date()
-    return{
-      years:date.getFullYear(),
-      month:date.getMonth(),
-      months:[1,2,3,4,5,6,7,8,9,10,11,12],
-      ID:'',
-      complete:{
-         Month:'',
-        SaleCount:'',
-        WorkCount:'',
-        SampleCount:'',
-        ShopCount:'',
-        StylistCount:'',
-      },
-      infoNull:false,
-      show:false
-    }
-  },
-  created(){
-    this.ID = this.$route.query.id
-    this.stylePlay = this.$route.query.stylePlay
-    this.getComplete(this.ID)
-    console.log(this.month)
-    this.showModel()
-  },
-  computed: {
-    ...mapGetters([
-      'AccessId'
-    ])
-  },
-  methods: {
-     editCompete(){
-      this.$router.push({
-        path:'/editCompete',
-        query:{
-          id:this.ID,
-          month:this.month,
-          year:this.years
-          }
-      })
+  import qs from 'qs'
+  import axios from "axios";
+  import {
+    mapGetters,
+    mapMutations
+  } from 'vuex';
+  const date = new Date()
+  export default {
+    name: 'competeProductAnalysis',
+    data() {
+      
+      return {
+        // years: date.getFullYear(),
+        yeared:date.getFullYear()-1,
+        month: date.getMonth(),
+        months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        ID: '',
+        complete: {
+          Month: '',
+          SaleCount: '',
+          WorkCount: '',
+          SampleCount: '',
+          ShopCount: '',
+          StylistCount: '',
+        },
+        infoNull: false,
+        show: false,
+        active:'',
+        yearIndex:0,
+        yearList:[date.getFullYear()-1,date.getFullYear()],
+        // active:false
+      }
     },
+    created() {
+      // this.time()
+      this.ID = this.$route.query.id
+       let month = this.$route.query.month|| ''
+       let year = this.$route.query.year || ''
+      this.stylePlay = this.$route.query.stylePlay||''
+      if(month){
+          this.month =month;
+      }
+      else{
+        if(date.getMonth()+1==1){
+          this.month = 12;
+        }
+        else{
+          this.month =date.getMonth();
+        }
+      }
+
+      if(year){
+       this.year=year;
+      }else{
+        if(date.getMonth()+1==1){
+          this.year = date.getFullYear()-1;
+        }
+        else{
+          this.year =date.getFullYear();
+        }
+
+      }
+
+
+      this.getComplete(this.ID,this.month,this.year)
+      this.showModel()
+    },
+    computed: {
+      ...mapGetters([
+        'AccessId'
+      ])
+    },
+    methods: {
+      editCompete() {
+        this.$router.push({
+          path: '/editCompete',
+          query: {
+            id: this.ID,
+            month: this.month,
+            year: this.year,
+            enter:2,
+          }
+        })
+      },
       //判断角色，显示对应的内容
       showModel() {
-        if ((this.AccessId == 5&&this.stylePlay=="")||this.AccessId == -1) {
+        console.log(this.AccessId,this.stylePlay)
+        if ((this.AccessId == 5 && this.stylePlay == "") || this.AccessId == -1) {
           this.show = true
 
         } else {
           this.show = false
         }
       },
-      handleYear(num) {
-        this.years = num
-        this.getComplete(this.ID, this.month, this.years)
+      handleYear(item,index) {
+        this.year=item
+        this.getComplete(this.ID, this.month, this.year)
+
       },
+      
       handleMonth(num) {
-        console.log(num)
         this.month = num
-        console.log(num)
-        this.getComplete(this.ID, this.month, this.years)
+        this.getComplete(this.ID, this.month, this.year)
       },
       //获取竞品信息
       getComplete(ID, month, year) {
@@ -129,7 +164,6 @@ export default {
             })
           })
           .then(res => {
-            console.log(res)
             if (res.data.Status === 1) {
               this.complete = res.data.Data
               if (this.complete.Code == 1) {
@@ -137,6 +171,9 @@ export default {
               } else {
                 this.infoNull = false
               }
+             
+        
+
             } else if (res.data.Status < 0) {
               this.delCookie("UserId")
               this.delCookie("token")
@@ -149,6 +186,7 @@ export default {
       },
     }
   }
+
 </script>
 
 <style scoped>
@@ -263,9 +301,11 @@ export default {
     margin-bottom: 10px;
     color: #808080;
   }
-  .competitionInfo p span:nth-child(2){
+
+  .competitionInfo p span:nth-child(2) {
     color: #000;
   }
+
   .competitionNum {
     display: flex;
     padding: 10px 0;
@@ -280,10 +320,12 @@ export default {
     color: #808080;
   }
 
-  .competitionNum p span{
+  .competitionNum p span {
     color: #000;
   }
-  .competitionNum p:nth-child(1),.competitionNum p:nth-child(2) {
+
+  .competitionNum p:nth-child(1),
+  .competitionNum p:nth-child(2) {
     border-right: 1px solid #f0f0f0;
   }
 

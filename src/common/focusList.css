@@ -26,8 +26,16 @@
   .contentList p {
     display: flex;
     align-items: center;
+    
   }
-
+.contentListBottom p{
+  display: block;
+  width: 50%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap !important;
+    line-height: 16px;
+}
   .contentListTop {
     margin-left: 30px;
   }
@@ -73,10 +81,7 @@
     line-height: 22px;
   }
 
-  .twoLine span:nth-child(2),
-  .twoLine.twoLineInfo span:nth-child(2),
-  .twoLine.twoLineInfo span:nth-child(3),
-  .twoLine .btn {
+  .twoLine span{
     width: 73px;
     height: 30px;
     background-color: #E2C78F;
@@ -193,7 +198,7 @@
   display: block;
   font-size: 10px;
   text-align: center;
-  line-height: 18px;
+  line-height: 20px;
   color: #F26F53;
 }
 .fangQi {
@@ -218,4 +223,7 @@
 }
 i{
   font-style: normal;
+}
+.twoLine span:first-child{
+  background: none;
 }
